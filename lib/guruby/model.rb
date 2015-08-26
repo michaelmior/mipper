@@ -26,6 +26,13 @@ module Guruby
       Gurobi.GRBsetintattr @ptr, GRB_INT_ATTR_MODELSENSE, sense
     end
 
+    # Get the status of the model
+    def status
+      intptr = FFI::MemoryPointer.new :pointer
+      Gurobi.GRBgetintattr @ptr, GRB_INT_ATTR_STATUS, intptr
+      intptr.read_int
+    end
+
     # Free the model
     def self.finalize(ptr)
       proc { Gurobi.GRBfreemodel ptr }
