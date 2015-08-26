@@ -11,6 +11,16 @@ module Guruby
       ObjectSpace.define_finalizer self, self.class.finalize(@ptr)
     end
 
+    # Add a new variable to the model
+    def add_var(lb, ub, obj, vtype, varname = '')
+      Gurobi.GRBaddvar @ptr, 0, nil, nil, obj, lb, ub, vtype.ord, varname
+    end
+
+    # Update the model
+    def update
+      Gurobi.GRBupdatemodel @ptr
+    end
+
     # Free the model
     def self.finalize(ptr)
       proc { Gurobi.GRBfreemodel ptr }
