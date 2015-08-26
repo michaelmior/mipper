@@ -11,11 +11,15 @@ module Guruby
 
       # Ensure the model is freed
       ObjectSpace.define_finalizer self, self.class.finalize(@ptr)
+
+      @var_count = 0
     end
 
-    # Add a new variable to the model
-    def add_var(lb, ub, obj, vtype, varname = '')
-      Gurobi.GRBaddvar @ptr, 0, nil, nil, obj, lb, ub, vtype.ord, varname
+    # Add new objects (variables and constraints) to the model
+    def <<(obj)
+      if obj.is_a? Variable
+        add_variable obj
+      end
     end
 
     # Add a new constraint to the model
@@ -57,9 +61,22 @@ module Guruby
       intptr.read_int
     end
 
+    private
+
     # Free the model
     def self.finalize(ptr)
       proc { Gurobi.GRBfreemodel ptr }
+    end
+
+    # Add a new variable to the model
+    def add_variable(var)
+      Gurobi.GRBaddvar @ptr, 0, nil, nil, var.coefficient,
+        var.lower_bound, var.upper_bound, var.type.ord, var.name
+
+      # Update the variable to track the index in the model
+      var.instance_variable_set :@model, self
+      var.instance_variable_set :@index, @var_count
+      @var_count += 1
     end
   end
 end

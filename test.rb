@@ -3,9 +3,9 @@ require_relative 'lib/guruby'
 env = Guruby::Environment.new
 model = Guruby::Model.new env
 
-model.add_var 0, 1, 1, Guruby::GRB_BINARY, 'x'
-model.add_var 0, 1, 1, Guruby::GRB_BINARY, 'y'
-model.add_var 0, 1, 2, Guruby::GRB_BINARY, 'z'
+model << Guruby::Variable.new(0, 1, 1, Guruby::GRB_BINARY, 'x')
+model << Guruby::Variable.new(0, 1, 1, Guruby::GRB_BINARY, 'y')
+model << Guruby::Variable.new(0, 1, 1, Guruby::GRB_BINARY, 'z')
 model.set_sense Guruby::GRB_MAXIMIZE
 model.update
 
