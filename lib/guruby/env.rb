@@ -1,3 +1,5 @@
+require_relative 'ext'
+
 module Guruby
   class Environment
     attr_reader :ptr

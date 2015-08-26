@@ -1,3 +1,5 @@
+require_relative 'ext'
+
 module Guruby
   class Model
     attr_reader :ptr
