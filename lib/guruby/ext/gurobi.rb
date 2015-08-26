@@ -22,6 +22,8 @@ module Gurobi
                                   :double, :string], :int
   attach_function :GRBoptimize, [:pointer], :int
 
+  attach_function :GRBsetintattr, [:pointer, :string, :int], :int
+
   attach_function :GRBgetintattr, [:pointer, :string, :pointer], :int
   attach_function :GRBgetdblattr, [:pointer, :string, :pointer], :int
   attach_function :GRBgetdblattrarray, [:pointer, :string, :int, :int,

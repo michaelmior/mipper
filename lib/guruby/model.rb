@@ -21,6 +21,11 @@ module Guruby
       Gurobi.GRBupdatemodel @ptr
     end
 
+    # Set the sense of the model
+    def set_sense(sense)
+      Gurobi.GRBsetintattr @ptr, GRB_INT_ATTR_MODELSENSE, sense
+    end
+
     # Free the model
     def self.finalize(ptr)
       proc { Gurobi.GRBfreemodel ptr }
