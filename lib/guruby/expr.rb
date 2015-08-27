@@ -24,7 +24,9 @@ module Guruby
     # Produce a string representing the expression
     def inspect
       @terms.map do |var, coeff|
-        next if coeff == 0
+        # Skip if the coefficient is zero or the value is zero
+        value = var.value
+        next if coeff == 0 || value == 0 || value == false
 
         coeff == 1 ? var.name : "#{var.name} * #{coeff}"
       end.join(' + ')

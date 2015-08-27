@@ -16,6 +16,9 @@ module Guruby
 
     # Get the final value of this variable
     def value
+      # Model must be solved to have a value
+      return nil unless @model && @model.status == GRB_OPTIMAL
+
       dblptr = FFI::MemoryPointer.new :pointer
       Gurobi::GRBgetdblattrarray @model.instance_variable_get(:@ptr),
                                  GRB_DBL_ATTR_X, @index, 1, dblptr

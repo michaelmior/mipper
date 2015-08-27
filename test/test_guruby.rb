@@ -67,5 +67,27 @@ module Guruby
 
       assert_equal @model.variables, [x]
     end
+
+    def test_nil_value_unsolved
+      x = Variable.new 0, 1, 0, GRB_BINARY, 'x'
+      @model << x
+
+      assert_nil x.value
+    end
+
+    def test_inspect_expr_skip_zeros
+      var = Variable.new 0, 1, 1, GRB_CONTINUOUS, 'x'
+      @model << var
+      @model.update
+
+      constr = Constraint.new var * 1, GRB_GREATER_EQUAL, 0
+      @model << constr
+
+      @model.update
+      @model.set_sense Guruby::GRB_MINIMIZE
+      @model.optimize
+
+      assert_equal constr.expression.inspect, ''
+    end
   end
 end
