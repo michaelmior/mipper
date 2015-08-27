@@ -23,14 +23,17 @@ module Guruby
     end
 
     # Add a new constraint to the model
-    def add_constraint(indexes, values, sense, rhs, name = '')
-      indexes_buffer = FFI::MemoryPointer.new :int, indexes.length
-      indexes_buffer.write_array_of_int indexes
+    def add_constraint(expr, sense, rhs, name = '')
+      indexes_buffer = FFI::MemoryPointer.new :int, expr.terms.length
+      indexes_buffer.write_array_of_int(expr.terms.map do |term|
+        term.variable.instance_variable_get(:@index)
+      end)
 
-      values_buffer = FFI::MemoryPointer.new :double, values.length
-      values_buffer.write_array_of_double values
+      values_buffer = FFI::MemoryPointer.new :double, expr.terms.length
+      values_buffer.write_array_of_double expr.terms.map(&:coefficient)
 
-      Gurobi.GRBaddconstr @ptr, indexes.length, indexes_buffer, values_buffer,
+      Gurobi.GRBaddconstr @ptr, expr.terms.length,
+                          indexes_buffer, values_buffer,
                           sense.ord, rhs, name
     end
 

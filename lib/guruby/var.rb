@@ -30,5 +30,13 @@ module Guruby
         value
       end
     end
+
+    # Create a {LinExpr} consisting of a single term
+    # which is this variable multiplied by a constant
+    def *(coeff)
+      fail TypeError unless coeff.is_a? Numeric
+
+      LinExpr.new [LinExprTerm.new(self, coeff)]
+    end
   end
 end
