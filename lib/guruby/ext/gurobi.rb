@@ -5,6 +5,7 @@ module Gurobi
   ffi_lib '/home/mmior/apps/gurobi563/linux64/lib/libgurobi56.so'
 
   attach_function :GRBloadenv, [:pointer, :string], :int
+  attach_function :GRBsetintparam, [:pointer, :string, :int], :int
   attach_function :GRBgeterrormsg, [:pointer], :string
   attach_function :GRBfreeenv, [:pointer], :void
 
