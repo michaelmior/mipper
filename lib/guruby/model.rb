@@ -2,9 +2,11 @@ require_relative 'ext'
 
 module Guruby
   class Model
-    attr_reader :ptr
+    attr_reader :ptr, :environment
 
     def initialize(env)
+      @environment = env
+
       @ptr = FFI::MemoryPointer.new :pointer
       Gurobi.GRBnewmodel env.ptr, @ptr, 'model', 0, nil, nil, nil, nil, nil
       @ptr = @ptr.read_pointer
