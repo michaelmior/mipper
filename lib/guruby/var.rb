@@ -49,5 +49,16 @@ module Guruby
         fail TypeError
       end
     end
+
+    # Produce the name of the variable and the value if the model is solved
+    def inspect
+      if @model && @model.status == GRB_OPTIMAL
+        value = self.value
+      else
+        value = '?'
+      end
+
+      "#{@name} = #{value}"
+    end
   end
 end

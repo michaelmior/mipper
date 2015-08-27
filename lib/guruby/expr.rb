@@ -20,5 +20,14 @@ module Guruby
         fail TypeError unless other.is_a? LinExpr
       end
     end
+
+    # Produce a string representing the expression
+    def inspect
+      @terms.map do |var, coeff|
+        next if coeff == 0
+
+        coeff == 1 ? var.name : "#{var.name} * #{coeff}"
+      end.join(' + ')
+    end
   end
 end
