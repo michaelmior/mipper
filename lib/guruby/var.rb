@@ -2,7 +2,7 @@ module Guruby
   class Variable
     attr_reader :lower_bound, :upper_bound, :coefficient, :type, :name, :model
 
-    def initialize(lb, ub, coeff, type, name = '')
+    def initialize(lb, ub, coeff, type, name = nil)
       @lower_bound = lb
       @upper_bound = ub
       @coefficient = coeff
