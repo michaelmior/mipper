@@ -80,7 +80,8 @@ module Guruby
     # Add a new variable to the model
     def add_variable(var)
       ret = Gurobi.GRBaddvar @ptr, 0, nil, nil, var.coefficient,
-                       var.lower_bound, var.upper_bound, var.type.ord, var.name
+                             var.lower_bound, var.upper_bound,
+                             var.type.ord, var.name
       fail if ret != 0
 
       # Update the variable to track the index in the model
