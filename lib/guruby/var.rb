@@ -36,7 +36,7 @@ module Guruby
     def *(coeff)
       fail TypeError unless coeff.is_a? Numeric
 
-      LinExpr.new [LinExprTerm.new(self, coeff)]
+      LinExpr.new({ self => coeff })
     end
 
     def +(other)

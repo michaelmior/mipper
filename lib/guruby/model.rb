@@ -91,12 +91,12 @@ module Guruby
     def add_constraint(constr)
       terms = constr.expression.terms
       indexes_buffer = FFI::MemoryPointer.new :int, terms.length
-      indexes_buffer.write_array_of_int(terms.map do |term|
-        term.variable.instance_variable_get(:@index)
+      indexes_buffer.write_array_of_int(terms.each_key.map do |var|
+        var.instance_variable_get(:@index)
       end)
 
       values_buffer = FFI::MemoryPointer.new :double, terms.length
-      values_buffer.write_array_of_double terms.map(&:coefficient)
+      values_buffer.write_array_of_double terms.values
 
       ret = Gurobi.GRBaddconstr @ptr, terms.length,
                                 indexes_buffer, values_buffer,
