@@ -73,7 +73,7 @@ module Guruby
     # Add a new variable to the model
     def add_variable(var)
       Gurobi.GRBaddvar @ptr, 0, nil, nil, var.coefficient,
-        var.lower_bound, var.upper_bound, var.type.ord, var.name
+                       var.lower_bound, var.upper_bound, var.type.ord, var.name
 
       # Update the variable to track the index in the model
       var.instance_variable_set :@model, self
@@ -93,8 +93,8 @@ module Guruby
       values_buffer.write_array_of_double terms.map(&:coefficient)
 
       Gurobi.GRBaddconstr @ptr, terms.length,
-        indexes_buffer, values_buffer,
-        constr.sense.ord, constr.rhs, constr.name
+                          indexes_buffer, values_buffer,
+                          constr.sense.ord, constr.rhs, constr.name
     end
 
   end
