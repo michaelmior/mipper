@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'guruby'
-  s.version     = '0.0.1'
+  s.version     = '0.0.2'
   s.license     = 'GPLv3'
 
   s.summary     = 'A Ruby interface to the Gurobi solver'
