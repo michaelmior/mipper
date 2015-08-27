@@ -31,7 +31,8 @@ module Guruby
 
     # Update the model
     def update
-      Gurobi.GRBupdatemodel @ptr
+      ret = Gurobi.GRBupdatemodel @ptr
+      fail if ret != 0
     end
 
     # Write the model to a file
@@ -41,25 +42,29 @@ module Guruby
 
     # Set the sense of the model
     def set_sense(sense)
-      Gurobi.GRBsetintattr @ptr, GRB_INT_ATTR_MODELSENSE, sense
+      ret = Gurobi.GRBsetintattr @ptr, GRB_INT_ATTR_MODELSENSE, sense
+      fail if ret != 0
     end
 
     # Optimize the model
     def optimize
-      Gurobi.GRBoptimize @ptr
+      ret = Gurobi.GRBoptimize @ptr
+      fail if ret != 0
     end
 
     # Get the status of the model
     def status
       intptr = FFI::MemoryPointer.new :pointer
-      Gurobi.GRBgetintattr @ptr, GRB_INT_ATTR_STATUS, intptr
+      ret = Gurobi.GRBgetintattr @ptr, GRB_INT_ATTR_STATUS, intptr
+      fail if ret != 0
       intptr.read_int
     end
 
     # The value of the objective function
     def objective_value
       dblptr = FFI::MemoryPointer.new :pointer
-      Gurobi.GRBgetdblattr @ptr, GRB_DBL_ATTR_OBJVAL, dblptr
+      ret = Gurobi.GRBgetdblattr @ptr, GRB_DBL_ATTR_OBJVAL, dblptr
+      fail if ret != 0
       dblptr.read_double
     end
 
@@ -72,8 +77,9 @@ module Guruby
 
     # Add a new variable to the model
     def add_variable(var)
-      Gurobi.GRBaddvar @ptr, 0, nil, nil, var.coefficient,
+      ret = Gurobi.GRBaddvar @ptr, 0, nil, nil, var.coefficient,
                        var.lower_bound, var.upper_bound, var.type.ord, var.name
+      fail if ret != 0
 
       # Update the variable to track the index in the model
       var.instance_variable_set :@model, self
@@ -92,9 +98,10 @@ module Guruby
       values_buffer = FFI::MemoryPointer.new :double, terms.length
       values_buffer.write_array_of_double terms.map(&:coefficient)
 
-      Gurobi.GRBaddconstr @ptr, terms.length,
-                          indexes_buffer, values_buffer,
-                          constr.sense.ord, constr.rhs, constr.name
+      ret = Gurobi.GRBaddconstr @ptr, terms.length,
+                                indexes_buffer, values_buffer,
+                                constr.sense.ord, constr.rhs, constr.name
+      fail if ret != 0
     end
 
   end
