@@ -29,7 +29,7 @@ module Guruby
         next if coeff == 0 || value == 0 || value == false
 
         coeff == 1 ? var.name : "#{var.name} * #{coeff}"
-      end.join(' + ')
+      end.compact.join(' + ')
     end
   end
 end
