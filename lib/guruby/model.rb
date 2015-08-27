@@ -17,24 +17,14 @@ module Guruby
 
     # Add new objects (variables and constraints) to the model
     def <<(obj)
-      if obj.is_a? Variable
+      case obj
+      when Variable
         add_variable obj
+      when Constraint
+        add_constraint obj
+      else
+        fail TypeError
       end
-    end
-
-    # Add a new constraint to the model
-    def add_constraint(expr, sense, rhs, name = '')
-      indexes_buffer = FFI::MemoryPointer.new :int, expr.terms.length
-      indexes_buffer.write_array_of_int(expr.terms.map do |term|
-        term.variable.instance_variable_get(:@index)
-      end)
-
-      values_buffer = FFI::MemoryPointer.new :double, expr.terms.length
-      values_buffer.write_array_of_double expr.terms.map(&:coefficient)
-
-      Gurobi.GRBaddconstr @ptr, expr.terms.length,
-                          indexes_buffer, values_buffer,
-                          sense.ord, rhs, name
     end
 
     # Update the model
@@ -81,5 +71,22 @@ module Guruby
       var.instance_variable_set :@index, @var_count
       @var_count += 1
     end
+
+    # Add a new constraint to the model
+    def add_constraint(constr)
+      terms = constr.expression.terms
+      indexes_buffer = FFI::MemoryPointer.new :int, terms.length
+      indexes_buffer.write_array_of_int(terms.map do |term|
+        term.variable.instance_variable_get(:@index)
+      end)
+
+      values_buffer = FFI::MemoryPointer.new :double, terms.length
+      values_buffer.write_array_of_double terms.map(&:coefficient)
+
+      Gurobi.GRBaddconstr @ptr, terms.length,
+        indexes_buffer, values_buffer,
+        constr.sense.ord, constr.rhs, constr.name
+    end
+
   end
 end
