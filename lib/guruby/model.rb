@@ -2,7 +2,7 @@ require_relative 'ext'
 
 module Guruby
   class Model
-    attr_reader :ptr, :environment
+    attr_reader :ptr, :environment, :variables, :constraints
 
     def initialize(env)
       @environment = env
@@ -15,6 +15,8 @@ module Guruby
       ObjectSpace.define_finalizer self, self.class.finalize(@ptr)
 
       @var_count = 0
+      @variables = []
+      @constraints = []
     end
 
     # Add new objects (variables and constraints) to the model
@@ -85,6 +87,8 @@ module Guruby
       var.instance_variable_set :@model, self
       var.instance_variable_set :@index, @var_count
       @var_count += 1
+
+      @variables << var
     end
 
     # Add a new constraint to the model
@@ -102,6 +106,8 @@ module Guruby
                                 indexes_buffer, values_buffer,
                                 constr.sense.ord, constr.rhs, constr.name
       fail if ret != 0
+
+      @constraints << constr
     end
 
   end

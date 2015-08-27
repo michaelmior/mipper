@@ -60,5 +60,12 @@ module Guruby
 
       assert_equal (x * 2 + y).inspect, 'x * 2 + y'
     end
+
+    def test_store_variables
+      x = Variable.new 0, 1, 0, GRB_BINARY, 'x'
+      @model << x
+
+      assert_equal @model.variables, [x]
+    end
   end
 end
