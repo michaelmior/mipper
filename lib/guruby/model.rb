@@ -62,6 +62,12 @@ module Guruby
       intptr.read_int
     end
 
+    # Compute an irreducible inconsistent subsytem for the model
+    def compute_IIS
+      ret = Gurobi.GRBcomputeIIS @ptr
+      fail if ret != 0
+    end
+
     # The value of the objective function
     def objective_value
       dblptr = FFI::MemoryPointer.new :pointer

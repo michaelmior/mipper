@@ -89,5 +89,19 @@ module Guruby
 
       assert_equal constr.expression.inspect, ''
     end
+
+    def test_compute_iis
+      var = Variable.new 0, 1, 1, GRB_CONTINUOUS, 'x'
+      @model << var
+      @model.update
+
+      # These two constraints cannot be satisfied
+      @model << Constraint.new(var * 1, GRB_EQUAL, 0)
+      @model << Constraint.new(var * 1, GRB_EQUAL, 1)
+      @model.update
+
+      @model.optimize
+      @model.compute_IIS
+    end
   end
 end
