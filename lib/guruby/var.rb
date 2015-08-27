@@ -8,7 +8,27 @@ module Guruby
       @coefficient = coeff
       @type = type
       @name = name
+
+      # These will be populated when this is added to a model
       @model = nil
+      @index = nil
+    end
+
+    # Get the final value of this variable
+    def value
+      dblptr = FFI::MemoryPointer.new :pointer
+      Gurobi::GRBgetdblattrarray @model.instance_variable_get(:@ptr),
+                                 GRB_DBL_ATTR_X, @index, 1, dblptr
+      value = dblptr.read_array_of_double(1)[0]
+
+      case @type
+      when GRB_INTEGER
+        value.round
+      when GRB_BINARY
+        [false, true][value.round]
+      else
+        value
+      end
     end
   end
 end

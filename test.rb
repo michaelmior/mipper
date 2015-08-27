@@ -3,9 +3,12 @@ require_relative 'lib/guruby'
 env = Guruby::Environment.new
 model = Guruby::Model.new env
 
-model << Guruby::Variable.new(0, 1, 1, Guruby::GRB_BINARY, 'x')
-model << Guruby::Variable.new(0, 1, 1, Guruby::GRB_BINARY, 'y')
-model << Guruby::Variable.new(0, 1, 1, Guruby::GRB_BINARY, 'z')
+vars = [
+  Guruby::Variable.new(0, 1, 1, Guruby::GRB_BINARY, 'x'),
+  Guruby::Variable.new(0, 1, 1, Guruby::GRB_BINARY, 'y'),
+  Guruby::Variable.new(0, 1, 2, Guruby::GRB_BINARY, 'z')
+]
+vars.each { |var| model << var }
 model.set_sense Guruby::GRB_MAXIMIZE
 model.update
 
@@ -16,5 +19,9 @@ model.update
 model.write '/tmp/test.lp'
 
 model.optimize
+
+vars.each do |var|
+  puts "#{var.name} = #{var.value}"
+end
 
 p model.status
