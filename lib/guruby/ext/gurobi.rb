@@ -2,7 +2,7 @@ require 'ffi'
 
 module Gurobi
   extend FFI::Library
-  ffi_lib '/home/mmior/apps/gurobi563/linux64/lib/libgurobi56.so'
+  ffi_lib File.join(ENV['GUROBI_HOME'], 'lib/libgurobi56.so')
 
   attach_function :GRBloadenv, [:pointer, :string], :int
   attach_function :GRBsetintparam, [:pointer, :string, :int], :int
