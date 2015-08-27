@@ -54,6 +54,13 @@ module Guruby
       intptr.read_int
     end
 
+    # The value of the objective function
+    def objective_value
+      dblptr = FFI::MemoryPointer.new :pointer
+      Gurobi.GRBgetdblattr @ptr, GRB_DBL_ATTR_OBJVAL, dblptr
+      dblptr.read_double
+    end
+
     private
 
     # Free the model

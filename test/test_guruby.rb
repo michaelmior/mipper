@@ -28,6 +28,8 @@ module Guruby
       assert_equal x.value, true
       assert_equal y.value, false
       assert_equal z.value, true
+
+      assert_in_delta @model.objective_value, 3, 0.001
     end
   end
 end
