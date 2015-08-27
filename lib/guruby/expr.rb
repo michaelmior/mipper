@@ -8,11 +8,17 @@ module Guruby
 
     # Add two {LinExpr}s
     def +(other)
-      fail TypeError unless other.is_a? LinExpr
-
-      # Add the terms of two expressions
-      # For now, this assumes variables are not duplicated
-      LinExpr.new @terms + other.terms
+      case other
+      when LinExpr
+        # Add the terms of two expressions
+        # For now, this assumes variables are not duplicated
+        LinExpr.new @terms + other.terms
+      when Variable
+        # Add the variable to the expression
+        self + other * 1.0
+      else
+        fail TypeError unless other.is_a? LinExpr
+      end
     end
   end
 
