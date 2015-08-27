@@ -22,6 +22,9 @@ module Gurobi
                                 :pointer, :pointer], :int
   attach_function :GRBaddconstr, [:pointer, :int, :pointer, :pointer, :char,
                                   :double, :string], :int
+  attach_function :GRBaddconstrs, [:pointer, :int, :int, :pointer, :pointer,
+                                   :pointer, :pointer, :pointer,
+                                   :pointer], :int
   attach_function :GRBoptimize, [:pointer], :int
   attach_function :GRBcomputeIIS, [:pointer], :int
   attach_function :GRBwrite, [:pointer, :string], :int

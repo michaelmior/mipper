@@ -43,7 +43,11 @@ module Guruby
       end
       @pending_variables = []
 
-      @pending_constraints.each  { |constr| add_constraint constr }
+      if @pending_constraints.length == 1
+        add_constraint @pending_constraints.first
+      elsif @pending_constraints.length > 0
+        add_constraints @pending_constraints
+      end
       @pending_constraints = []
 
       ret = Gurobi.GRBupdatemodel @ptr
@@ -113,7 +117,7 @@ module Guruby
       type_buffer = FFI::MemoryPointer.new :char, vars.length
       type_buffer.write_array_of_char vars.map { |var| var.type.ord }
 
-      names = vars.map { |var| FFI::MemoryPointer.from_string var.name }
+      names = array_to_pointers_to_names vars
       names_buffer = FFI::MemoryPointer.new :pointer, vars.length
       names_buffer.write_array_of_pointer names
 
@@ -147,6 +151,44 @@ module Guruby
       @variables << var
     end
 
+    # Add multiple constraints at once
+    def add_constraints(constrs)
+      cbeg = []
+      cind = []
+      cval = []
+      constrs.each_with_index.map do |constr, i|
+        cbeg << cind.length
+        constr.expression.terms.each do |var, coeff|
+          cind << var.instance_variable_get(:@index)
+          cval << coeff
+        end
+      end
+
+      cbeg_buffer = FFI::MemoryPointer.new :pointer, cbeg.length
+      cbeg_buffer.write_array_of_int cbeg
+
+      cind_buffer = FFI::MemoryPointer.new :pointer, cind.length
+      cind_buffer.write_array_of_int cind
+
+      cval_buffer = FFI::MemoryPointer.new :pointer, cval.length
+      cval_buffer.write_array_of_double cval
+
+      sense_buffer = FFI::MemoryPointer.new :pointer, constrs.length
+      sense_buffer.write_array_of_char constrs.map { |c| c.sense.ord }
+
+      rhs_buffer = FFI::MemoryPointer.new :pointer, constrs.length
+      rhs_buffer.write_array_of_double constrs.map(&:rhs)
+
+      names = array_to_pointers_to_names constrs
+      names_buffer = FFI::MemoryPointer.new :pointer, constrs.length
+      names_buffer.write_array_of_pointer names
+
+      ret = Gurobi.GRBaddconstrs @ptr, constrs.length, cind.length,
+                                 cbeg_buffer, cind_buffer, cval_buffer,
+                                 sense_buffer, rhs_buffer, names_buffer
+      fail if ret != 0
+    end
+
     # Add a new constraint to the model
     def add_constraint(constr)
       terms = constr.expression.terms
@@ -166,5 +208,12 @@ module Guruby
       @constraints << constr
     end
 
+    # Convert an array of objects to an FFI array of
+    # memory pointers to the names of each object
+    def array_to_pointers_to_names(arr)
+      arr.map do |obj|
+        obj.name.nil? ? nil : FFI::MemoryPointer.from_string(obj.name)
+      end
+    end
   end
 end
