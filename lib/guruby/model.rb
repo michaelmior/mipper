@@ -36,7 +36,11 @@ module Guruby
 
     # Update the model
     def update
-      @pending_variables.each  { |var| add_variable var }
+      if @pending_variables.length == 1
+        add_variable @pending_variables.first
+      elsif @pending_variables.length > 0
+        add_variables @pending_variables
+      end
       @pending_variables = []
 
       @pending_constraints.each  { |constr| add_constraint constr }
@@ -95,6 +99,34 @@ module Guruby
       proc { Gurobi.GRBfreemodel ptr }
     end
 
+    # Add multiple variables to the model simultaneously
+    def add_variables(vars)
+      objective_buffer = FFI::MemoryPointer.new :double, vars.length
+      objective_buffer.write_array_of_double vars.map(&:coefficient)
+
+      lb_buffer = FFI::MemoryPointer.new :double, vars.length
+      lb_buffer.write_array_of_double vars.map(&:lower_bound)
+
+      ub_buffer = FFI::MemoryPointer.new :double, vars.length
+      ub_buffer.write_array_of_double vars.map(&:upper_bound)
+
+      type_buffer = FFI::MemoryPointer.new :char, vars.length
+      type_buffer.write_array_of_char vars.map { |var| var.type.ord }
+
+      names = vars.map { |var| FFI::MemoryPointer.from_string var.name }
+      names_buffer = FFI::MemoryPointer.new :pointer, vars.length
+      names_buffer.write_array_of_pointer names
+
+      ret = Gurobi.GRBaddvars @ptr, vars.length, 0, nil, nil, nil,
+                              objective_buffer, lb_buffer, ub_buffer,
+                              type_buffer, names_buffer
+
+      fail if ret != 0
+
+      # Store all the variables in the model
+      vars.each { |var| store_variable var }
+    end
+
     # Add a new variable to the model
     def add_variable(var)
       ret = Gurobi.GRBaddvar @ptr, 0, nil, nil, var.coefficient,
@@ -102,6 +134,11 @@ module Guruby
                              var.type.ord, var.name
       fail if ret != 0
 
+      store_variable var
+    end
+
+    # Save the variable to the model and update the variable pointers
+    def store_variable(var)
       # Update the variable to track the index in the model
       var.instance_variable_set :@model, self
       var.instance_variable_set :@index, @var_count
