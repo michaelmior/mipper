@@ -81,7 +81,7 @@ module Guruby
     def set_double_attribute(name, value)
       buffer = FFI::MemoryPointer.new :double, 1
       buffer.write_array_of_double [value]
-      ret = Gurobi.GRBsetdblattrarray model.ptr, name, @index, 1, buffer
+      ret = Gurobi.GRBsetdblattrarray @model.ptr, name, @index, 1, buffer
       fail if ret != 0
     end
   end
