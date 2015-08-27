@@ -38,5 +38,16 @@ module Guruby
 
       LinExpr.new [LinExprTerm.new(self, coeff)]
     end
+
+    def +(other)
+      case other
+      when LinExpr
+        other + self * 1
+      when Variable
+        self * 1 + other * 1
+      else
+        fail TypeError
+      end
+    end
   end
 end

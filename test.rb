@@ -11,8 +11,8 @@ vars.each { |var| model << var }
 model.set_sense Guruby::GRB_MAXIMIZE
 model.update
 
-model.add_constraint x * 1 + y * 2 + z * 3, Guruby::GRB_LESS_EQUAL, 4.0, 'c0'
-model.add_constraint x * 1 + y * 1, Guruby::GRB_GREATER_EQUAL, 1.0, 'c1'
+model.add_constraint x + y * 2 + z * 3, Guruby::GRB_LESS_EQUAL, 4.0, 'c0'
+model.add_constraint x + y, Guruby::GRB_GREATER_EQUAL, 1.0, 'c1'
 model.update
 
 model.write '/tmp/test.lp'
