@@ -90,6 +90,19 @@ module Guruby
       assert_equal constr.expression.inspect, ''
     end
 
+    def test_set_variable_bounds
+      var = Variable.new 0, 1, 1, GRB_CONTINUOUS, 'x'
+      @model << var
+      @model.update
+      var.upper_bound = 5
+
+      @model.update
+      @model.set_sense Guruby::GRB_MAXIMIZE
+      @model.optimize
+
+      assert_in_delta var.value, 5, 0.001
+    end
+
     def test_compute_iis
       var = Variable.new 0, 1, 1, GRB_CONTINUOUS, 'x'
       @model << var

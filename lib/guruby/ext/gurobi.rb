@@ -32,4 +32,6 @@ module Gurobi
   attach_function :GRBgetdblattr, [:pointer, :string, :pointer], :int
   attach_function :GRBgetdblattrarray, [:pointer, :string, :int, :int,
                                         :pointer], :int
+  attach_function :GRBsetdblattrarray, [:pointer, :string, :int, :int,
+                                        :pointer], :int
 end

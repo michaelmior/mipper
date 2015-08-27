@@ -14,6 +14,18 @@ module Guruby
       @index = nil
     end
 
+    # Set the variable lower bound
+    def lower_bound=(lb)
+      set_double_attribute GRB_DBL_ATTR_LB, lb
+      @lower_bound = lb
+    end
+
+    # Set the variable upper bound
+    def upper_bound=(ub)
+      set_double_attribute GRB_DBL_ATTR_UB, ub
+      @upper_bound = ub
+    end
+
     # Get the final value of this variable
     def value
       # Model must be solved to have a value
@@ -62,6 +74,15 @@ module Guruby
       end
 
       "#{@name} = #{value}"
+    end
+
+    private
+
+    def set_double_attribute(name, value)
+      buffer = FFI::MemoryPointer.new :double, 1
+      buffer.write_array_of_double [value]
+      ret = Gurobi.GRBsetdblattrarray model.ptr, name, @index, 1, buffer
+      fail if ret != 0
     end
   end
 end
