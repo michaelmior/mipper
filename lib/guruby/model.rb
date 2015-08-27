@@ -17,15 +17,18 @@ module Guruby
       @var_count = 0
       @variables = []
       @constraints = []
+
+      @pending_variables = []
+      @pending_constraints = []
     end
 
     # Add new objects (variables and constraints) to the model
     def <<(obj)
       case obj
       when Variable
-        add_variable obj
+        @pending_variables << obj
       when Constraint
-        add_constraint obj
+        @pending_constraints << obj
       else
         fail TypeError
       end
@@ -33,6 +36,12 @@ module Guruby
 
     # Update the model
     def update
+      @pending_variables.each  { |var| add_variable var }
+      @pending_variables = []
+
+      @pending_constraints.each  { |constr| add_constraint constr }
+      @pending_constraints = []
+
       ret = Gurobi.GRBupdatemodel @ptr
       fail if ret != 0
     end
@@ -50,6 +59,9 @@ module Guruby
 
     # Optimize the model
     def optimize
+      # Ensure pending variables and constraints are added
+      update
+
       ret = Gurobi.GRBoptimize @ptr
       fail if ret != 0
     end
