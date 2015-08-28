@@ -117,5 +117,23 @@ module Guruby
       @model.optimize
       @model.compute_IIS
     end
+
+    def test_expr_add_expr
+      x = Guruby::Variable.new(0, 1, 1, Guruby::GRB_BINARY, 'x')
+      y = Guruby::Variable.new(0, 1, 1, Guruby::GRB_BINARY, 'y')
+      expr = LinExpr.new({x => 1.0})
+      expr.add LinExpr.new({y => 1.0})
+
+      assert_equal expr.terms, { x => 1.0, y => 1.0}
+    end
+
+    def test_expr_add_var
+      x = Guruby::Variable.new(0, 1, 1, Guruby::GRB_BINARY, 'x')
+      y = Guruby::Variable.new(0, 1, 1, Guruby::GRB_BINARY, 'y')
+      expr = LinExpr.new({x => 1.0})
+      expr.add y
+
+      assert_equal expr.terms, { x => 1.0, y => 1.0}
+    end
   end
 end

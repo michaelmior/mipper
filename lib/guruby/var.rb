@@ -57,9 +57,9 @@ module Guruby
     def +(other)
       case other
       when LinExpr
-        other + self * 1
+        other + self * 1.0
       when Variable
-        self * 1 + other * 1
+        LinExpr.new({self => 1.0, other => 1.0})
       else
         fail TypeError
       end

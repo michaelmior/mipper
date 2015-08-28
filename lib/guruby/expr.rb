@@ -17,7 +17,23 @@ module Guruby
         # Add the variable to the expression
         self + other * 1.0
       else
-        fail TypeError unless other.is_a? LinExpr
+        fail TypeError
+      end
+    end
+
+    # Add terms from the other expression to this one
+    def add(other)
+      case other
+      when LinExpr
+        @terms.merge!(other.terms) { |_, c1, c2| c1 + c2 }
+      when Variable
+        if @terms.key? other
+          @terms[other] += 1.0
+        else
+          @terms[other] = 1.0
+        end
+      else
+        fail TypeError
       end
     end
 
