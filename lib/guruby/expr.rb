@@ -35,6 +35,8 @@ module Guruby
       else
         fail TypeError
       end
+
+      self
     end
 
     # Produce a string representing the expression
