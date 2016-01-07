@@ -31,8 +31,8 @@ module MIPPeR
 
     # Set the sense of the model
     def sense=(sense)
-      sense = sense == :min ? Gurobi::GRB_MINIMIZE : Gurobi::GRB_MAXIMIZE
       @sense = sense
+      sense = sense == :min ? Gurobi::GRB_MINIMIZE : Gurobi::GRB_MAXIMIZE
       ret = Gurobi.GRBsetintattr @ptr, Gurobi::GRB_INT_ATTR_MODELSENSE, sense
       fail if ret != 0
     end
