@@ -1,6 +1,6 @@
 require_relative 'ext'
 
-module Guruby
+module MIPPeR
   class Model
     attr_reader :ptr, :environment, :variables, :constraints
 

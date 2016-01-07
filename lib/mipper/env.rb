@@ -1,6 +1,6 @@
 require_relative 'ext'
 
-module Guruby
+module MIPPeR
   class Environment
     attr_reader :ptr
 

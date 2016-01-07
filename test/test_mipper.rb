@@ -1,26 +1,26 @@
 require 'minitest/autorun'
-require 'guruby'
+require 'mipper'
 
-module Guruby
-  class GurubyTest < MiniTest::Test
+module MIPPeR
+  class MIPPeRTest < MiniTest::Test
     def setup
-      env = Guruby::Environment.new
-      @model = Guruby::Model.new env
+      env = MIPPeR::Environment.new
+      @model = MIPPeR::Model.new env
     end
 
     def test_mip
-      x = Guruby::Variable.new(0, 1, 1, Guruby::GRB_BINARY, 'x')
-      y = Guruby::Variable.new(0, 1, 1, Guruby::GRB_BINARY, 'y')
-      z = Guruby::Variable.new(0, 1, 2, Guruby::GRB_BINARY, 'z')
+      x = MIPPeR::Variable.new(0, 1, 1, MIPPeR::GRB_BINARY, 'x')
+      y = MIPPeR::Variable.new(0, 1, 1, MIPPeR::GRB_BINARY, 'y')
+      z = MIPPeR::Variable.new(0, 1, 2, MIPPeR::GRB_BINARY, 'z')
       vars = [x, y, z]
       vars.each { |var| @model << var }
-      @model.set_sense Guruby::GRB_MAXIMIZE
+      @model.set_sense MIPPeR::GRB_MAXIMIZE
       @model.update
 
-      @model << Guruby::Constraint.new(x + y * 2 + z * 3,
-                                       Guruby::GRB_LESS_EQUAL, 4.0, 'c0')
-      @model << Guruby::Constraint.new(x + y,
-                                       Guruby::GRB_GREATER_EQUAL, 1.0, 'c1')
+      @model << MIPPeR::Constraint.new(x + y * 2 + z * 3,
+                                       MIPPeR::GRB_LESS_EQUAL, 4.0, 'c0')
+      @model << MIPPeR::Constraint.new(x + y,
+                                       MIPPeR::GRB_GREATER_EQUAL, 1.0, 'c1')
 
       @model.update
       @model.optimize
@@ -85,7 +85,7 @@ module Guruby
       @model << constr
 
       @model.update
-      @model.set_sense Guruby::GRB_MINIMIZE
+      @model.set_sense MIPPeR::GRB_MINIMIZE
       @model.optimize
 
       assert_equal constr.expression.inspect, ''
@@ -98,7 +98,7 @@ module Guruby
       var.upper_bound = 5
 
       @model.update
-      @model.set_sense Guruby::GRB_MAXIMIZE
+      @model.set_sense MIPPeR::GRB_MAXIMIZE
       @model.optimize
 
       assert_in_delta var.value, 5, 0.001
@@ -119,8 +119,8 @@ module Guruby
     end
 
     def test_expr_add_expr
-      x = Guruby::Variable.new(0, 1, 1, Guruby::GRB_BINARY, 'x')
-      y = Guruby::Variable.new(0, 1, 1, Guruby::GRB_BINARY, 'y')
+      x = MIPPeR::Variable.new(0, 1, 1, MIPPeR::GRB_BINARY, 'x')
+      y = MIPPeR::Variable.new(0, 1, 1, MIPPeR::GRB_BINARY, 'y')
       expr = LinExpr.new({x => 1.0})
       expr.add LinExpr.new({y => 1.0})
 
@@ -128,8 +128,8 @@ module Guruby
     end
 
     def test_expr_add_var
-      x = Guruby::Variable.new(0, 1, 1, Guruby::GRB_BINARY, 'x')
-      y = Guruby::Variable.new(0, 1, 1, Guruby::GRB_BINARY, 'y')
+      x = MIPPeR::Variable.new(0, 1, 1, MIPPeR::GRB_BINARY, 'x')
+      y = MIPPeR::Variable.new(0, 1, 1, MIPPeR::GRB_BINARY, 'y')
       expr = LinExpr.new({x => 1.0})
       expr.add y
 

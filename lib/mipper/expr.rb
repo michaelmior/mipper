@@ -1,4 +1,4 @@
-module Guruby
+module MIPPeR
   class LinExpr
     attr_reader :terms
 

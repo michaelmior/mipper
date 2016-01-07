@@ -1,4 +1,4 @@
-module Guruby
+module MIPPeR
   class Constraint
     attr_reader :expression, :sense, :rhs, :name
 

@@ -1,4 +1,4 @@
-module Guruby
+module MIPPeR
   class Variable
     attr_reader :lower_bound, :upper_bound, :coefficient, :type, :name, :model
 

@@ -1,3 +1,3 @@
-# Guruby
+# MIPPeR: Mixed Integer Programming Performed with Ruby
 
-A Ruby interface to the [Gurobi](http://www.gurobi.com/) solver.
+A Ruby interface to various MIP solvers.
