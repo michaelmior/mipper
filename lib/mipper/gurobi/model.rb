@@ -75,7 +75,16 @@ module MIPPeR
       intptr = FFI::MemoryPointer.new :pointer
       ret = Gurobi.GRBgetintattr @ptr, Gurobi::GRB_INT_ATTR_STATUS, intptr
       fail if ret != 0
-      intptr.read_int
+
+      case intptr.read_int
+      when Gurobi::GRB_OPTIMAL
+        :optimized
+      when Gurobi::GRB_INFEASIBLE, Gurobi::GRB_INF_OR_UNBD,
+           Gurobi::GRB_UNBOUNDED
+        :invalid
+      else
+        :unknown
+      end
     end
 
     # Compute an irreducible inconsistent subsytem for the model

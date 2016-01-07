@@ -29,7 +29,7 @@ module MIPPeR
     # Get the final value of this variable
     def value
       # Model must be solved to have a value
-      return nil unless @model && @model.status == Gurobi::GRB_OPTIMAL
+      return nil unless @model && @model.status == :optimized
 
       dblptr = FFI::MemoryPointer.new :pointer
       Gurobi.GRBgetdblattrarray @model.instance_variable_get(:@ptr),
@@ -67,7 +67,7 @@ module MIPPeR
 
     # Produce the name of the variable and the value if the model is solved
     def inspect
-      if @model && @model.status == Gurobi::GRB_OPTIMAL
+      if @model && @model.status == :optimized
         value = self.value
       else
         value = '?'

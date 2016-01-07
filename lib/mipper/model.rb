@@ -47,7 +47,7 @@ module MIPPeR
 
     # Get the status of the model
     def status
-      fail NotImplementedError
+      :unknown
     end
 
     # Compute an irreducible inconsistent subsytem for the model
