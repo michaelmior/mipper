@@ -101,6 +101,30 @@ module MIPPeR
       dblptr.read_double
     end
 
+    def set_variable_lower_bound(var_index, lb)
+      set_double_attribute Gurobi::GRB_DBL_ATTR_LB, var_index, lb
+    end
+
+    def set_variable_upper_bound(var_index, ub)
+      set_double_attribute Gurobi::GRB_DBL_ATTR_UB, var_index, ub
+    end
+
+    def variable_value(var)
+      dblptr = FFI::MemoryPointer.new :pointer
+      Gurobi.GRBgetdblattrarray @ptr, Gurobi::GRB_DBL_ATTR_X,
+                                var.index, 1, dblptr
+      value = dblptr.read_array_of_double(1)[0]
+
+      case var.type
+      when :integer
+        value.round
+      when :binary
+        [false, true][value.round]
+      else
+        value
+      end
+    end
+
     private
 
     # Free the model
@@ -120,7 +144,7 @@ module MIPPeR
       ub_buffer.write_array_of_double vars.map(&:upper_bound)
 
       type_buffer = FFI::MemoryPointer.new :char, vars.length
-      type_buffer.write_array_of_char vars.map { |var| var.type.ord }
+      type_buffer.write_array_of_char vars.map { |var| gurobi_type(var.type) }
 
       names = array_to_pointers_to_names vars
       names_buffer = FFI::MemoryPointer.new :pointer, vars.length
@@ -140,7 +164,7 @@ module MIPPeR
     def add_variable(var)
       ret = Gurobi.GRBaddvar @ptr, 0, nil, nil, var.coefficient,
                              var.lower_bound, var.upper_bound,
-                             var.type.ord, var.name
+                             gurobi_type(var.type), var.name
       fail if ret != 0
 
       store_variable var
@@ -213,11 +237,31 @@ module MIPPeR
       @constraints << constr
     end
 
+    def set_double_attribute(name, var_index, value)
+      buffer = FFI::MemoryPointer.new :double, 1
+      buffer.write_array_of_double [value]
+      ret = Gurobi.GRBsetdblattrarray @ptr, name, var_index, 1, buffer
+      fail if ret != 0
+    end
+
     # Convert an array of objects to an FFI array of
     # memory pointers to the names of each object
     def array_to_pointers_to_names(arr)
       arr.map do |obj|
         obj.name.nil? ? nil : FFI::MemoryPointer.from_string(obj.name)
+      end
+    end
+
+    def gurobi_type(type)
+      case type
+      when :integer
+        Gurobi::GRB_INTEGER.ord
+      when :binary
+        Gurobi::GRB_BINARY.ord
+      when :continuous
+        Gurobi::GRB_CONTINUOUS.ord
+      else
+        fail type
       end
     end
   end

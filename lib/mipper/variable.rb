@@ -1,6 +1,7 @@
 module MIPPeR
   class Variable
-    attr_reader :lower_bound, :upper_bound, :coefficient, :type, :name, :model
+    attr_reader :lower_bound, :upper_bound, :coefficient, :type, :name, :model,
+                :index
 
     def initialize(lb, ub, coeff, type, name = nil)
       @lower_bound = lb
@@ -16,14 +17,14 @@ module MIPPeR
 
     # Set the variable lower bound
     def lower_bound=(lb)
-      set_double_attribute Gurobi::GRB_DBL_ATTR_LB, lb
       @lower_bound = lb
+      @model.set_variable_lower_bound @index, lb
     end
 
     # Set the variable upper bound
     def upper_bound=(ub)
-      set_double_attribute Gurobi::GRB_DBL_ATTR_UB, ub
       @upper_bound = ub
+      @model.set_variable_upper_bound @index, ub
     end
 
     # Get the final value of this variable
@@ -31,19 +32,7 @@ module MIPPeR
       # Model must be solved to have a value
       return nil unless @model && @model.status == :optimized
 
-      dblptr = FFI::MemoryPointer.new :pointer
-      Gurobi.GRBgetdblattrarray @model.instance_variable_get(:@ptr),
-                                Gurobi::GRB_DBL_ATTR_X, @index, 1, dblptr
-      value = dblptr.read_array_of_double(1)[0]
-
-      case @type
-      when Gurobi::GRB_INTEGER
-        value.round
-      when Gurobi::GRB_BINARY
-        [false, true][value.round]
-      else
-        value
-      end
+      @model.variable_value self
     end
 
     # Create a {LinExpr} consisting of a single term
@@ -74,15 +63,6 @@ module MIPPeR
       end
 
       "#{@name} = #{value}"
-    end
-
-    private
-
-    def set_double_attribute(name, value)
-      buffer = FFI::MemoryPointer.new :double, 1
-      buffer.write_array_of_double [value]
-      ret = Gurobi.GRBsetdblattrarray @model.ptr, name, @index, 1, buffer
-      fail if ret != 0
     end
   end
 end

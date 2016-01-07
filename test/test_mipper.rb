@@ -8,9 +8,9 @@ module MIPPeR
     end
 
     def test_mip
-      x = Variable.new(0, 1, 1, Gurobi::GRB_BINARY, 'x')
-      y = Variable.new(0, 1, 1, Gurobi::GRB_BINARY, 'y')
-      z = Variable.new(0, 1, 2, Gurobi::GRB_BINARY, 'z')
+      x = Variable.new(0, 1, 1, :binary, 'x')
+      y = Variable.new(0, 1, 1, :binary, 'y')
+      z = Variable.new(0, 1, 2, :binary, 'z')
       vars = [x, y, z]
       vars.each { |var| @model << var }
       @model.sense = :max
@@ -32,7 +32,7 @@ module MIPPeR
     end
 
     def test_inspect_var
-      var = Variable.new 0, 1, 1, Gurobi::GRB_BINARY, 'x'
+      var = Variable.new 0, 1, 1, :binary, 'x'
       @model << var
       @model.update
       @model.optimize
@@ -41,27 +41,27 @@ module MIPPeR
     end
 
     def test_inspect_unknown_var
-      var = Variable.new 0, 1, 0, Gurobi::GRB_BINARY, 'x'
+      var = Variable.new 0, 1, 0, :binary, 'x'
 
       assert_equal var.inspect, 'x = ?'
     end
 
     def test_inspect_expr_simple
-      x = Variable.new 0, 1, 0, Gurobi::GRB_BINARY, 'x'
-      y = Variable.new 0, 1, 0, Gurobi::GRB_BINARY, 'y'
+      x = Variable.new 0, 1, 0, :binary, 'x'
+      y = Variable.new 0, 1, 0, :binary, 'y'
 
       assert_equal (x + y).inspect, 'x + y'
     end
 
     def test_inspect_expr_coeffs
-      x = Variable.new 0, 1, 0, Gurobi::GRB_BINARY, 'x'
-      y = Variable.new 0, 1, 0, Gurobi::GRB_BINARY, 'y'
+      x = Variable.new 0, 1, 0, :binary, 'x'
+      y = Variable.new 0, 1, 0, :binary, 'y'
 
       assert_equal (x * 2 + y).inspect, 'x * 2 + y'
     end
 
     def test_store_variables
-      x = Variable.new 0, 1, 0, Gurobi::GRB_BINARY, 'x'
+      x = Variable.new 0, 1, 0, :binary, 'x'
       @model << x
       @model.update
 
@@ -69,14 +69,14 @@ module MIPPeR
     end
 
     def test_nil_value_unsolved
-      x = Variable.new 0, 1, 0, Gurobi::GRB_BINARY, 'x'
+      x = Variable.new 0, 1, 0, :binary, 'x'
       @model << x
 
       assert_nil x.value
     end
 
     def test_inspect_expr_skip_zeros
-      var = Variable.new 0, 1, 1, Gurobi::GRB_CONTINUOUS, 'x'
+      var = Variable.new 0, 1, 1, :continuous, 'x'
       @model << var
       @model.update
 
@@ -91,7 +91,7 @@ module MIPPeR
     end
 
     def test_set_variable_bounds
-      var = Variable.new 0, 1, 1, Gurobi::GRB_CONTINUOUS, 'x'
+      var = Variable.new 0, 1, 1, :continuous, 'x'
       @model << var
       @model.update
       var.upper_bound = 5
@@ -104,7 +104,7 @@ module MIPPeR
     end
 
     def test_compute_iis
-      var = Variable.new 0, 1, 1, Gurobi::GRB_CONTINUOUS, 'x'
+      var = Variable.new 0, 1, 1, :continuous, 'x'
       @model << var
       @model.update
 
@@ -118,8 +118,8 @@ module MIPPeR
     end
 
     def test_expr_add_expr
-      x = Variable.new(0, 1, 1, Gurobi::GRB_BINARY, 'x')
-      y = Variable.new(0, 1, 1, Gurobi::GRB_BINARY, 'y')
+      x = Variable.new(0, 1, 1, :binary, 'x')
+      y = Variable.new(0, 1, 1, :binary, 'y')
       expr = LinExpr.new({x => 1.0})
       expr.add LinExpr.new({y => 1.0})
 
@@ -127,8 +127,8 @@ module MIPPeR
     end
 
     def test_expr_add_var
-      x = Variable.new(0, 1, 1, Gurobi::GRB_BINARY, 'x')
-      y = Variable.new(0, 1, 1, Gurobi::GRB_BINARY, 'y')
+      x = Variable.new(0, 1, 1, :binary, 'x')
+      y = Variable.new(0, 1, 1, :binary, 'y')
       expr = LinExpr.new({x => 1.0})
       expr.add y
 
