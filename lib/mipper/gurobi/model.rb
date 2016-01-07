@@ -5,7 +5,7 @@ module MIPPeR
     def initialize
       super
 
-      @environment = Environment.new
+      @environment = Gurobi::Environment.new
 
       @ptr = FFI::MemoryPointer.new :pointer
       Gurobi.GRBnewmodel @environment.ptr, @ptr, 'model',
