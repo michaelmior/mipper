@@ -27,7 +27,19 @@ module MIPPeR
 
     # Update the model
     def update
-      fail NotImplementedError
+      if @pending_variables.length == 1
+        add_variable @pending_variables.first
+      elsif @pending_variables.length > 0
+        add_variables @pending_variables
+      end
+      @pending_variables = []
+
+      if @pending_constraints.length == 1
+        add_constraint @pending_constraints.first
+      elsif @pending_constraints.length > 0
+        add_constraints @pending_constraints
+      end
+      @pending_constraints = []
     end
 
     # Write the model to a file

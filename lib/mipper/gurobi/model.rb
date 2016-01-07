@@ -16,33 +16,9 @@ module MIPPeR
       ObjectSpace.define_finalizer self, self.class.finalize(@ptr)
     end
 
-    # Add new objects (variables and constraints) to the model
-    def <<(obj)
-      case obj
-      when Variable
-        @pending_variables << obj
-      when Constraint
-        @pending_constraints << obj
-      else
-        fail TypeError
-      end
-    end
-
     # Update the model
     def update
-      if @pending_variables.length == 1
-        add_variable @pending_variables.first
-      elsif @pending_variables.length > 0
-        add_variables @pending_variables
-      end
-      @pending_variables = []
-
-      if @pending_constraints.length == 1
-        add_constraint @pending_constraints.first
-      elsif @pending_constraints.length > 0
-        add_constraints @pending_constraints
-      end
-      @pending_constraints = []
+      super
 
       ret = Gurobi.GRBupdatemodel @ptr
       fail if ret != 0
