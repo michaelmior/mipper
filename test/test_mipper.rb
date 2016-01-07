@@ -16,10 +16,8 @@ module MIPPeR
       @model.sense = :max
       @model.update
 
-      @model << Constraint.new(x + y * 2 + z * 3,
-                               Gurobi::GRB_LESS_EQUAL, 4.0, 'c0')
-      @model << Constraint.new(x + y,
-                               Gurobi::GRB_GREATER_EQUAL, 1.0, 'c1')
+      @model << Constraint.new(x + y * 2 + z * 3, :<=, 4.0, 'c0')
+      @model << Constraint.new(x + y, :>=, 1.0, 'c1')
 
       @model.update
       @model.optimize
@@ -80,7 +78,7 @@ module MIPPeR
       @model << var
       @model.update
 
-      constr = Constraint.new var * 1, Gurobi::GRB_GREATER_EQUAL, 0
+      constr = Constraint.new var * 1, :>=, 0
       @model << constr
 
       @model.update
@@ -109,8 +107,8 @@ module MIPPeR
       @model.update
 
       # These two constraints cannot be satisfied
-      @model << Constraint.new(var * 1, Gurobi::GRB_EQUAL, 0)
-      @model << Constraint.new(var * 1, Gurobi::GRB_EQUAL, 1)
+      @model << Constraint.new(var * 1, :==, 0)
+      @model << Constraint.new(var * 1, :==, 1)
       @model.update
 
       @model.optimize

@@ -203,7 +203,9 @@ module MIPPeR
       cval_buffer.write_array_of_double cval
 
       sense_buffer = FFI::MemoryPointer.new :pointer, constrs.length
-      sense_buffer.write_array_of_char constrs.map { |c| c.sense.ord }
+      sense_buffer.write_array_of_char(constrs.map do |c|
+        gurobi_sense(c.sense)
+      end)
 
       rhs_buffer = FFI::MemoryPointer.new :pointer, constrs.length
       rhs_buffer.write_array_of_double constrs.map(&:rhs)
@@ -231,7 +233,8 @@ module MIPPeR
 
       ret = Gurobi.GRBaddconstr @ptr, terms.length,
                                 indexes_buffer, values_buffer,
-                                constr.sense.ord, constr.rhs, constr.name
+                                gurobi_sense(constr.sense),
+                                constr.rhs, constr.name
       fail if ret != 0
 
       @constraints << constr
@@ -250,6 +253,10 @@ module MIPPeR
       arr.map do |obj|
         obj.name.nil? ? nil : FFI::MemoryPointer.from_string(obj.name)
       end
+    end
+
+    def gurobi_sense(sense)
+      sense.to_s[0].ord
     end
 
     def gurobi_type(type)
