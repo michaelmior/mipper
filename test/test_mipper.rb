@@ -4,8 +4,7 @@ require 'mipper'
 module MIPPeR
   class MIPPeRTest < MiniTest::Test
     def setup
-      env = Environment.new
-      @model = Model.new env
+      @model = GurobiModel.new
     end
 
     def test_mip
@@ -14,7 +13,7 @@ module MIPPeR
       z = Variable.new(0, 1, 2, Gurobi::GRB_BINARY, 'z')
       vars = [x, y, z]
       vars.each { |var| @model << var }
-      @model.set_sense Gurobi::GRB_MAXIMIZE
+      @model.sense = :max
       @model.update
 
       @model << Constraint.new(x + y * 2 + z * 3,
@@ -85,7 +84,7 @@ module MIPPeR
       @model << constr
 
       @model.update
-      @model.set_sense Gurobi::GRB_MINIMIZE
+      @model.sense = :min
       @model.optimize
 
       assert_equal constr.expression.inspect, ''
@@ -98,7 +97,7 @@ module MIPPeR
       var.upper_bound = 5
 
       @model.update
-      @model.set_sense Gurobi::GRB_MAXIMIZE
+      @model.sense = :max
       @model.optimize
 
       assert_in_delta var.value, 5, 0.001
