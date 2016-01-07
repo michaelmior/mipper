@@ -3,7 +3,7 @@ require 'ffi'
 module MIPPeR
   module Gurobi
     # Hide the constants inside the MIPPeR::Gurobi module
-    module_eval File.read(File.expand_path './gurobi/constants.rb',
+    module_eval File.read(File.expand_path './ext/constants.rb',
                           File.dirname(__FILE__))
 
     extend FFI::Library

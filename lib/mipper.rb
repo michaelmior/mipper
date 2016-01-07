@@ -1,5 +1,3 @@
-require_relative 'mipper/ext'
-
 require_relative 'mipper/constraint'
 require_relative 'mipper/expression'
 require_relative 'mipper/model'
