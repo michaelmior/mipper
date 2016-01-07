@@ -1,5 +1,3 @@
-require_relative 'ext'
-
 module MIPPeR
   class Model
     attr_reader :ptr, :environment, :variables, :constraints
@@ -61,7 +59,7 @@ module MIPPeR
 
     # Set the sense of the model
     def set_sense(sense)
-      ret = Gurobi.GRBsetintattr @ptr, GRB_INT_ATTR_MODELSENSE, sense
+      ret = Gurobi.GRBsetintattr @ptr, Gurobi::GRB_INT_ATTR_MODELSENSE, sense
       fail if ret != 0
     end
 
@@ -77,7 +75,7 @@ module MIPPeR
     # Get the status of the model
     def status
       intptr = FFI::MemoryPointer.new :pointer
-      ret = Gurobi.GRBgetintattr @ptr, GRB_INT_ATTR_STATUS, intptr
+      ret = Gurobi.GRBgetintattr @ptr, Gurobi::GRB_INT_ATTR_STATUS, intptr
       fail if ret != 0
       intptr.read_int
     end
@@ -91,7 +89,7 @@ module MIPPeR
     # The value of the objective function
     def objective_value
       dblptr = FFI::MemoryPointer.new :pointer
-      ret = Gurobi.GRBgetdblattr @ptr, GRB_DBL_ATTR_OBJVAL, dblptr
+      ret = Gurobi.GRBgetdblattr @ptr, Gurobi::GRB_DBL_ATTR_OBJVAL, dblptr
       fail if ret != 0
       dblptr.read_double
     end

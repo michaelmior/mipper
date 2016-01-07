@@ -1,3 +1,5 @@
+require_relative 'mipper/ext'
+
 require_relative 'mipper/constr'
 require_relative 'mipper/env'
 require_relative 'mipper/expr'

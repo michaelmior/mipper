@@ -16,30 +16,30 @@ module MIPPeR
 
     # Set the variable lower bound
     def lower_bound=(lb)
-      set_double_attribute GRB_DBL_ATTR_LB, lb
+      set_double_attribute Gurobi::GRB_DBL_ATTR_LB, lb
       @lower_bound = lb
     end
 
     # Set the variable upper bound
     def upper_bound=(ub)
-      set_double_attribute GRB_DBL_ATTR_UB, ub
+      set_double_attribute Gurobi::GRB_DBL_ATTR_UB, ub
       @upper_bound = ub
     end
 
     # Get the final value of this variable
     def value
       # Model must be solved to have a value
-      return nil unless @model && @model.status == GRB_OPTIMAL
+      return nil unless @model && @model.status == Gurobi::GRB_OPTIMAL
 
       dblptr = FFI::MemoryPointer.new :pointer
-      Gurobi::GRBgetdblattrarray @model.instance_variable_get(:@ptr),
-                                 GRB_DBL_ATTR_X, @index, 1, dblptr
+      Gurobi.GRBgetdblattrarray @model.instance_variable_get(:@ptr),
+                                Gurobi::GRB_DBL_ATTR_X, @index, 1, dblptr
       value = dblptr.read_array_of_double(1)[0]
 
       case @type
-      when GRB_INTEGER
+      when Gurobi::GRB_INTEGER
         value.round
-      when GRB_BINARY
+      when Gurobi::GRB_BINARY
         [false, true][value.round]
       else
         value
@@ -67,7 +67,7 @@ module MIPPeR
 
     # Produce the name of the variable and the value if the model is solved
     def inspect
-      if @model && @model.status == GRB_OPTIMAL
+      if @model && @model.status == Gurobi::GRB_OPTIMAL
         value = self.value
       else
         value = '?'
