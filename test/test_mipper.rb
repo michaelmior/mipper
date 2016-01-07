@@ -2,11 +2,7 @@ require 'minitest/autorun'
 require 'mipper'
 
 module MIPPeR
-  class MIPPeRTest < MiniTest::Test
-    def setup
-      @model = GurobiModel.new
-    end
-
+  module MIPPeRModelTest
     def test_mip
       x = Variable.new(0, 1, 1, :binary, 'x')
       y = Variable.new(0, 1, 1, :binary, 'y')
@@ -131,6 +127,14 @@ module MIPPeR
       expr.add y
 
       assert_equal expr.terms, { x => 1.0, y => 1.0}
+    end
+  end
+
+  class GurobiTest < MiniTest::Test
+    include MIPPeRModelTest
+
+    def setup
+      @model = GurobiModel.new
     end
   end
 end
