@@ -181,6 +181,8 @@ module MIPPeR
                                  cbeg_buffer, cind_buffer, cval_buffer,
                                  sense_buffer, rhs_buffer, names_buffer
       fail if ret != 0
+
+      @constraints.concat constrs
     end
 
     # Add a new constraint to the model
