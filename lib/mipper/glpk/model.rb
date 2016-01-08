@@ -35,9 +35,10 @@ module MIPPeR
       update
 
       # Run the solver and save the status for later
-      ret = GLPK.glp_simplex @ptr, nil
-      fail if ret != 0
-      @status = GLPK.glp_intopt @ptr, nil
+      iocp = GLPK::IOCP.new
+      GLPK.glp_init_iocp iocp
+      iocp[:presolve] = GLPK::GLP_ON
+      @status = GLPK.glp_intopt @ptr, iocp
     end
 
     # Get the status of the model

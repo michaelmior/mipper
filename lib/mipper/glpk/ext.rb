@@ -1,5 +1,7 @@
 require 'ffi'
 
+require_relative 'ext/structs'
+
 module MIPPeR
   module GLPK
     # Hide the constants inside the MIPPeR::Gurobi module
@@ -30,6 +32,7 @@ module MIPPeR
     attach_function :glp_simplex, [:pointer, :pointer], :int
     attach_function :glp_set_col_kind, [:pointer, :int, :int], :void
     attach_function :glp_intopt, [:pointer, :pointer], :int
+    attach_function :glp_init_iocp, [:pointer], :void
     attach_function :glp_mip_status, [:pointer], :int
     attach_function :glp_mip_obj_val, [:pointer], :double
     attach_function :glp_mip_row_val, [:pointer, :int], :double
