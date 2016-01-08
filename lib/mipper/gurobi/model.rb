@@ -87,20 +87,12 @@ module MIPPeR
       set_double_attribute Gurobi::GRB_DBL_ATTR_UB, var_index, ub
     end
 
+    # Get the value of a variable from the model
     def variable_value(var)
       dblptr = FFI::MemoryPointer.new :pointer
       Gurobi.GRBgetdblattrarray @ptr, Gurobi::GRB_DBL_ATTR_X,
                                 var.index, 1, dblptr
-      value = dblptr.read_array_of_double(1)[0]
-
-      case var.type
-      when :integer
-        value.round
-      when :binary
-        [false, true][value.round]
-      else
-        value
-      end
+      dblptr.read_array_of_double(1)[0]
     end
 
     protected

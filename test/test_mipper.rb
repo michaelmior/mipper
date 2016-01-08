@@ -34,39 +34,12 @@ module MIPPeR
       assert_equal var.inspect, 'x = false'
     end
 
-    def test_inspect_unknown_var
-      var = Variable.new 0, 1, 0, :binary, 'x'
-
-      assert_equal var.inspect, 'x = ?'
-    end
-
-    def test_inspect_expr_simple
-      x = Variable.new 0, 1, 0, :binary, 'x'
-      y = Variable.new 0, 1, 0, :binary, 'y'
-
-      assert_equal (x + y).inspect, 'x + y'
-    end
-
-    def test_inspect_expr_coeffs
-      x = Variable.new 0, 1, 0, :binary, 'x'
-      y = Variable.new 0, 1, 0, :binary, 'y'
-
-      assert_equal (x * 2 + y).inspect, 'x * 2 + y'
-    end
-
     def test_store_variables
       x = Variable.new 0, 1, 0, :binary, 'x'
       @model << x
       @model.update
 
       assert_equal @model.variables, [x]
-    end
-
-    def test_nil_value_unsolved
-      x = Variable.new 0, 1, 0, :binary, 'x'
-      @model << x
-
-      assert_nil x.value
     end
 
     def test_inspect_expr_skip_zeros
@@ -83,7 +56,16 @@ module MIPPeR
 
       assert_equal constr.expression.inspect, ''
     end
+  end
 
+  class GurobiTest < MiniTest::Test
+    include MIPPeRModelTest
+
+    def setup
+      @model = GurobiModel.new
+    end
+
+    # XXX This should be moved to MIPPeRModelTest once GLPK support is added
     def test_set_variable_bounds
       var = Variable.new 0, 1, 1, :continuous, 'x'
       @model << var
@@ -110,6 +92,45 @@ module MIPPeR
       @model.optimize
       @model.compute_IIS
     end
+  end
+
+  class GLPKTest < MiniTest::Test
+    include MIPPeRModelTest
+
+    def setup
+      @model = GLPKModel.new
+    end
+  end
+
+  class VarTest
+    def test_inspect_unknown_var
+      var = Variable.new 0, 1, 0, :binary, 'x'
+
+      assert_equal var.inspect, 'x = ?'
+    end
+
+    def test_nil_value_unsolved
+      x = Variable.new 0, 1, 0, :binary, 'x'
+      @model << x
+
+      assert_nil x.value
+    end
+  end
+
+  class ExprTest
+    def test_inspect_expr_simple
+      x = Variable.new 0, 1, 0, :binary, 'x'
+      y = Variable.new 0, 1, 0, :binary, 'y'
+
+      assert_equal (x + y).inspect, 'x + y'
+    end
+
+    def test_inspect_expr_coeffs
+      x = Variable.new 0, 1, 0, :binary, 'x'
+      y = Variable.new 0, 1, 0, :binary, 'y'
+
+      assert_equal (x * 2 + y).inspect, 'x * 2 + y'
+    end
 
     def test_expr_add_expr
       x = Variable.new(0, 1, 1, :binary, 'x')
@@ -127,14 +148,6 @@ module MIPPeR
       expr.add y
 
       assert_equal expr.terms, { x => 1.0, y => 1.0}
-    end
-  end
-
-  class GurobiTest < MiniTest::Test
-    include MIPPeRModelTest
-
-    def setup
-      @model = GurobiModel.new
     end
   end
 end

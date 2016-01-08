@@ -32,7 +32,16 @@ module MIPPeR
       # Model must be solved to have a value
       return nil unless @model && @model.status == :optimized
 
-      @model.variable_value self
+      value = @model.variable_value self
+
+      case @type
+      when :integer
+        value.round
+      when :binary
+        [false, true][value.round]
+      else
+        value
+      end
     end
 
     # Create a {LinExpr} consisting of a single term
