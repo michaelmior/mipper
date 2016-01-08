@@ -18,7 +18,7 @@ module MIPPeR
 
     # Write the model to a file
     def write(filename)
-      ret = GLPK.glp_write_prob @ptr, 0, filename
+      ret = GLPK.glp_write_lp @ptr, 0, filename
       fail if ret != 0
     end
 
