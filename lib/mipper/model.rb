@@ -5,7 +5,6 @@ module MIPPeR
     def initialize
       @sense = :min
 
-      @var_count = 0
       @variables = []
       @constraints = []
 

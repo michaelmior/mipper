@@ -5,6 +5,8 @@ module MIPPeR
     def initialize
       super
 
+      @var_count = 0
+
       @environment = Gurobi::Environment.new
 
       @ptr = FFI::MemoryPointer.new :pointer
