@@ -101,12 +101,7 @@ module MIPPeR
       end
     end
 
-    private
-
-    # Free the model
-    def self.finalize(ptr)
-      proc { Gurobi.GRBfreemodel ptr }
-    end
+    protected
 
     # Add multiple variables to the model simultaneously
     def add_variables(vars)
@@ -144,16 +139,6 @@ module MIPPeR
       fail if ret != 0
 
       store_variable var
-    end
-
-    # Save the variable to the model and update the variable pointers
-    def store_variable(var)
-      # Update the variable to track the index in the model
-      var.instance_variable_set :@model, self
-      var.instance_variable_set :@index, @var_count
-      @var_count += 1
-
-      @variables << var
     end
 
     # Add multiple constraints at once
@@ -214,6 +199,23 @@ module MIPPeR
       fail if ret != 0
 
       @constraints << constr
+    end
+
+    private
+
+    # Free the model
+    def self.finalize(ptr)
+      proc { Gurobi.GRBfreemodel ptr }
+    end
+
+    # Save the variable to the model and update the variable pointers
+    def store_variable(var)
+      # Update the variable to track the index in the model
+      var.instance_variable_set :@model, self
+      var.instance_variable_set :@index, @var_count
+      @var_count += 1
+
+      @variables << var
     end
 
     def set_double_attribute(name, var_index, value)

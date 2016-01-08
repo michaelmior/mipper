@@ -71,5 +71,27 @@ module MIPPeR
     def objective_value
       fail NotImplementedError
     end
+
+    protected
+
+    def add_variable(var)
+      add_variables([var])
+    end
+
+    def add_constraint(constr)
+      add_constraints([constr])
+    end
+
+    def set_variable_lower_bound(var_index, lb)
+      fail NotImplementedError
+    end
+
+    def set_variable_upper_bound(var_index, lb)
+      fail NotImplementedError
+    end
+
+    def variable_value(var)
+      fail NotImplementedError
+    end
   end
 end
