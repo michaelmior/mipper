@@ -79,11 +79,8 @@ module MIPPeR
       dblptr.read_double
     end
 
-    def set_variable_lower_bound(var_index, lb)
+    def set_variable_bounds(var_index, lb, ub)
       set_double_attribute Gurobi::GRB_DBL_ATTR_LB, var_index, lb
-    end
-
-    def set_variable_upper_bound(var_index, ub)
       set_double_attribute Gurobi::GRB_DBL_ATTR_UB, var_index, ub
     end
 

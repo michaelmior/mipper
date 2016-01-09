@@ -56,16 +56,7 @@ module MIPPeR
 
       assert_equal constr.expression.inspect, ''
     end
-  end
 
-  class GurobiTest < MiniTest::Test
-    include MIPPeRModelTest
-
-    def setup
-      @model = GurobiModel.new
-    end
-
-    # XXX This should be moved to MIPPeRModelTest once GLPK support is added
     def test_set_variable_bounds
       var = Variable.new 0, 1, 1, :continuous, 'x'
       @model << var
@@ -77,6 +68,14 @@ module MIPPeR
       @model.optimize
 
       assert_in_delta var.value, 5, 0.001
+    end
+  end
+
+  class GurobiTest < MiniTest::Test
+    include MIPPeRModelTest
+
+    def setup
+      @model = GurobiModel.new
     end
 
     def test_compute_iis

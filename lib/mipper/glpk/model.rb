@@ -68,6 +68,20 @@ module MIPPeR
       GLPK.glp_mip_col_val(@ptr, var.index)
     end
 
+    def set_variable_bounds(var_index, lb, ub)
+      # Determine the type of the variable bounds
+      if lb == ub
+        type = GLPK::GLP_FX
+      elsif lb.finite?
+        type = ub.finite? ? GLPK::GLP_DB : GLPK::GLP_LO
+      else
+        type = ub.finite? ? GLPK::GLP_UP : GLPK::GLP_FR
+      end
+
+      # Set the bounds on the variable
+      GLPK.glp_set_col_bnds(@ptr, var_index, type, lb, ub)
+    end
+
     protected
 
     # Add multiple variables to the model simultaneously
@@ -154,19 +168,7 @@ module MIPPeR
       GLPK.glp_set_col_name(@ptr, index, var.name)
       GLPK.glp_set_col_kind(@ptr, index, glpk_type(var.type))
       GLPK.glp_set_obj_coef(@ptr, index, var.coefficient)
-
-      # Determine the type of the variable bounds
-      if var.lower_bound == var.upper_bound
-        type = GLPK::GLP_FX
-      elsif var.lower_bound.finite?
-        type = var.upper_bound.finite? ? GLPK::GLP_DB : GLPK::GLP_LO
-      else
-        type = var.upper_bound.finite? ? GLPK::GLP_UP : GLPK::GLP_FR
-      end
-
-      # Set the bounds on the variable
-      GLPK.glp_set_col_bnds(@ptr, index, type,
-                            var.lower_bound, var.upper_bound)
+      set_variable_bounds index, var.lower_bound, var.upper_bound
     end
 
     # Get the constant GLPK uses to represent our variable types

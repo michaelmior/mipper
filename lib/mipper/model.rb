@@ -81,11 +81,7 @@ module MIPPeR
       add_constraints([constr])
     end
 
-    def set_variable_lower_bound(var_index, lb)
-      fail NotImplementedError
-    end
-
-    def set_variable_upper_bound(var_index, lb)
+    def set_variable_bounds(var_index, ub, lb)
       fail NotImplementedError
     end
 

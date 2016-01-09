@@ -17,14 +17,14 @@ module MIPPeR
 
     # Set the variable lower bound
     def lower_bound=(lb)
+      @model.set_variable_bounds @index, lb, @upper_bound
       @lower_bound = lb
-      @model.set_variable_lower_bound @index, lb
     end
 
     # Set the variable upper bound
     def upper_bound=(ub)
+      @model.set_variable_bounds @index, @lower_bound, ub
       @upper_bound = ub
-      @model.set_variable_upper_bound @index, ub
     end
 
     # Get the final value of this variable
