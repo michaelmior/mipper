@@ -8,6 +8,11 @@ module MIPPeR
       @var_count = 0
       @constr_count = 0
 
+      # Constraint matrix initialization (see #add_constraints)
+      @ia = [0]
+      @ja = [0]
+      @ar = [0]
+
       # Disable terminal output
       GLPK.glp_term_out GLPK::GLP_OFF
 
@@ -82,27 +87,26 @@ module MIPPeR
       # * ia - row (constraint) index
       # * ja - column (variable) index
       # * ar - constraint coefficient
-      ia = [0]
-      ja = [0]
-      ar = [0]
       constrs.each do |constr|
         store_constraint constr
         constr.expression.terms.each do |var, coeff|
-          ia << constr.instance_variable_get(:@index)
-          ja << var.instance_variable_get(:@index)
-          ar << coeff
+          @ia << constr.instance_variable_get(:@index)
+          @ja << var.instance_variable_get(:@index)
+          @ar << coeff
         end
       end
 
-      ia_buffer = FFI::MemoryPointer.new :pointer, ia.length
-      ia_buffer.write_array_of_int ia
-      ja_buffer = FFI::MemoryPointer.new :pointer, ja.length
-      ja_buffer.write_array_of_int ja
-      ar_buffer = FFI::MemoryPointer.new :pointer, ar.length
-      ar_buffer.write_array_of_double ar
+      ia_buffer = FFI::MemoryPointer.new :pointer, @ia.length
+      ia_buffer.write_array_of_int @ia
+      ja_buffer = FFI::MemoryPointer.new :pointer, @ja.length
+      ja_buffer.write_array_of_int @ja
+      ar_buffer = FFI::MemoryPointer.new :pointer, @ar.length
+      ar_buffer.write_array_of_double @ar
 
-      GLPK.glp_load_matrix(@ptr, ar.length - 1, ia_buffer, ja_buffer,
+      GLPK.glp_load_matrix(@ptr, @ar.length - 1, ia_buffer, ja_buffer,
                            ar_buffer)
+
+      @constraints.concat constrs
     end
 
     private
