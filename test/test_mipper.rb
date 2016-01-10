@@ -101,6 +101,14 @@ module MIPPeR
     end
   end
 
+  class LPSolveTest < MiniTest::Test
+    include MIPPeRModelTest
+
+    def setup
+      @model = LPSolveModel.new
+    end
+  end
+
   class VarTest
     def test_inspect_unknown_var
       var = Variable.new 0, 1, 0, :binary, 'x'
