@@ -20,6 +20,7 @@ module MIPPeR
         :clq_cuts, :int,
         :presolve, :int,
         :binarize, :int,
+        :fp_heur, :int,
         :alien, :int,
         :foo_bar, [:double, 29]
     end
