@@ -129,22 +129,22 @@ class H2RB
 	line[s..(-1)] = ""
       end
     end
-      
+
     line.gsub!(/\s+$/,"")
     return line
   end
-  
+
   def up_indent
     @indent += 1
   end
-  
+
   def down_indent
     @indent -= 1
     if( @indent < 0 )
       raise
     end
   end
-  
+
   def indent
     "  " * @indent
   end
@@ -249,7 +249,7 @@ class H2RB
     end
     return line
   end
-  
+
   def parse_undef(line)
     case line
     when /^#\s*undef\s+([A-Z]\S+)$/
@@ -263,7 +263,7 @@ class H2RB
     end
     return line
   end
-  
+
   def parse_ifdef(line)
     case line
     when /^#\s*ifdef\s+(\S+)$/
@@ -276,7 +276,7 @@ class H2RB
     end
     return line
   end
-  
+
   def parse_ifndef(line)
     case line
     when /^#\s*ifndef\s+(\S+)$/
@@ -289,7 +289,7 @@ class H2RB
     end
     return line
   end
-  
+
   def parse_if(line)
     case line
     when /^#\s*if\s+(.+)$/
@@ -306,7 +306,7 @@ class H2RB
     end
     return line
   end
-  
+
   def parse_elif(line)
     case line
     when /^#\s*elif\s+(.+)$/
@@ -318,7 +318,7 @@ class H2RB
     end
     return line
   end
-  
+
   def parse_else(line)
     case line
     when /^#\s*else\s*/
@@ -328,7 +328,7 @@ class H2RB
     end
     return line
   end
-  
+
   def parse_endif(line)
     case line
     when /^#\s*endif\s*$/
@@ -338,7 +338,7 @@ class H2RB
     end
     return line
   end
-  
+
   def parse_include(line)
     if( ! @insert_require )
       return nil
@@ -384,7 +384,7 @@ class H2RB
     else
       outfilename = nil
     end
-    
+
     if( infilename )
       fin    = File.open(infilename,"r")
     else
@@ -401,14 +401,6 @@ class H2RB
     end
 
     $stderr.print("#{infilename} -> #{outfilename}\n")
-    if( fout )
-      dir = File.dirname(outfilename)
-      if( dir[0,1] != "." && dir != "" )
-	fout.print("if( ! $LOAD_PATH.include?('#{dir}') )\n",
-		   "  $LOAD_PATH.push('#{dir}')\n",
-		   "end\n")
-      end
-    end
     return [fin,fout]
   end
 
@@ -433,7 +425,7 @@ class H2RB
 	if( $DEBUG )
 	  $stderr.print("#{line_number}:(#{@indent}):", line, "\n")
 	end
-	
+
 	if( pre_line )
 	  line = pre_line + line
 	  pre_line = nil
