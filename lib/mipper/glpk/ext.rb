@@ -4,7 +4,7 @@ require_relative 'ext/structs'
 
 module MIPPeR
   module GLPK
-    # Hide the constants inside the MIPPeR::Gurobi module
+    # Hide the constants inside the MIPPeR::GLPK module
     module_eval File.read(File.expand_path './ext/constants.rb',
                           File.dirname(__FILE__))
 
