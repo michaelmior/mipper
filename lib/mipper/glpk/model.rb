@@ -133,8 +133,6 @@ module MIPPeR
       constr.instance_variable_set :@index, index
       @constr_count += 1
 
-      @constraints << constr
-
       # Set constraint properties
       GLPK.glp_set_row_name(@ptr, index, constr.name)
 
