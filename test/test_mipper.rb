@@ -25,6 +25,20 @@ module MIPPeR
       assert_in_delta @model.objective_value, 3, 0.001
     end
 
+    def test_invalid
+      x = Variable.new(0, 1, 1, :binary, 'x')
+      @model << x
+      @model.update
+
+      @model << Constraint.new(x * 1, :>=, 1, 'c0')
+      @model << Constraint.new(x * 1, :<=, -1, 'c1')
+
+      @model.update
+      @model.optimize
+
+      assert @model.status == :invalid
+    end
+
     def test_inspect_var
       var = Variable.new 0, 1, 1, :binary, 'x'
       @model << var

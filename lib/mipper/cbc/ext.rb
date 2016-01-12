@@ -28,5 +28,8 @@ module MIPPeR
     attach_function :Cbc_status, [:pointer], :int
     attach_function :Cbc_secondaryStatus, [:pointer], :int
     attach_function :Cbc_printModel, [:pointer, :string], :void
+    attach_function :Cbc_isProvenOptimal, [:pointer], :int
+    attach_function :Cbc_isProvenInfeasible, [:pointer], :int
+    attach_function :Cbc_isContinuousUnbounded, [:pointer], :int
   end
 end

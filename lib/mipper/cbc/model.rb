@@ -27,19 +27,22 @@ module MIPPeR
 
       # Run the solver and save the status for later
       Cbc.Cbc_solve @ptr
+      fail if Cbc.Cbc_status(@ptr) != 0
+
+      # Check and store the model status
+      if Cbc.Cbc_isProvenOptimal(@ptr) == 1
+        @status = :optimized
+      elsif Cbc.Cbc_isProvenInfeasible(@ptr) == 1 or
+            Cbc.Cbc_isContinuousUnbounded(@ptr) == 1
+        @status = :invalid
+      else
+        @status = :unknown
+      end
     end
 
     # Get the status of the model
     def status
-      @status = Cbc.Cbc_status @ptr
-      case @status
-      when 0
-        :optimized
-      when 1, 2
-        :invalid
-      else
-        :unknown
-      end
+      @status
     end
 
     # The value of the objective function
