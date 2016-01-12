@@ -17,13 +17,13 @@ module MIPPeR
 
     # Set the variable lower bound
     def lower_bound=(lb)
-      @model.set_variable_bounds @index, lb, @upper_bound
+      @model.set_variable_bounds @index, lb, @upper_bound unless @model.nil?
       @lower_bound = lb
     end
 
     # Set the variable upper bound
     def upper_bound=(ub)
-      @model.set_variable_bounds @index, @lower_bound, ub
+      @model.set_variable_bounds @index, @lower_bound, ub unless @model.nil?
       @upper_bound = ub
     end
 

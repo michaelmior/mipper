@@ -29,6 +29,9 @@ module MIPPeR
       var = Variable.new 0, 1, 1, :binary, 'x'
       @model << var
       @model.update
+      @model << Constraint.new(var * 1.0, :>=, 0.0)
+      @model.sense = :min
+      @model.update
       @model.optimize
 
       assert_equal var.inspect, 'x = false'
@@ -61,13 +64,23 @@ module MIPPeR
       var = Variable.new 0, 1, 1, :continuous, 'x'
       @model << var
       @model.update
+      @model << Constraint.new(var * 1.0, :>=, 0.0)
+      @model.update
       var.upper_bound = 5
 
-      @model.update
       @model.sense = :max
+      @model.update
       @model.optimize
 
       assert_in_delta var.value, 5, 0.001
+    end
+  end
+
+  class CbcTest < MiniTest::Test
+    include MIPPeRModelTest
+
+    def setup
+      @model = CbcModel.new
     end
   end
 
