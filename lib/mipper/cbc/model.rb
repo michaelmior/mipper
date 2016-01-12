@@ -11,6 +11,7 @@ module MIPPeR
       # Construct a new model
       @ptr = FFI::AutoPointer.new Cbc.Cbc_newModel,
                                   Cbc.method(:Cbc_deleteModel)
+      Cbc.Cbc_setParameter @ptr, 'logLevel', '0'
     end
 
     # Set the sense of the model
