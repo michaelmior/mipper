@@ -1,5 +1,6 @@
 module MIPPeR
   class Variable
+    attr_accessor :constraints
     attr_reader :lower_bound, :upper_bound, :coefficient, :type, :name, :model,
                 :index
 
@@ -9,6 +10,7 @@ module MIPPeR
       @coefficient = coeff
       @type = type
       @name = name
+      @constraints = []
 
       # These will be populated when this is added to a model
       @model = nil

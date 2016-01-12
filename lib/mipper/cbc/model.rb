@@ -72,6 +72,12 @@ module MIPPeR
 
     # Add multiple constraints at once
     def add_constraints(constrs)
+      # Store the index which will be used for each constraint
+      constrs.each do |constr|
+        constr.instance_variable_set :@index, @constr_count
+        @constr_count += 1
+      end
+
       # Construct a matrix of non-zero values in CSC format
       start = []
       index = []
@@ -81,14 +87,10 @@ module MIPPeR
         # Mark the start of this column
         start << col_start
 
-        constrs.each_with_index do |constr, row_index|
-          # Find the coefficient for this variable or skip if none
-          coeff = constr.expression.terms[var]
-          next unless coeff
-
+        var.constraints.each do |constr|
           col_start += 1
-          index << row_index
-          value << coeff
+          index << constr.instance_variable_get(:@index)
+          value << constr.expression.terms[var]
         end
       end
       start << col_start
@@ -121,10 +123,8 @@ module MIPPeR
     # Save the constraint to the model and update the constraint pointers
     def store_constraint(constr)
       # Update the constraint to track the index in the model
-      index = @constr_count
+      index = constr.instance_variable_get(:@index)
       constr.instance_variable_set :@model, self
-      constr.instance_variable_set :@index, index
-      @constr_count += 1
 
       # Set constraint properties
       Cbc.Cbc_setRowName(@ptr, index, constr.name) unless constr.name.nil?
