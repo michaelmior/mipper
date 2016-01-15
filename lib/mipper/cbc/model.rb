@@ -18,11 +18,28 @@ module MIPPeR
 
     # Write the model to a file in MPS format
     def write_mps(filename)
+      # Make a new model and ensure everything is added
+      old_ptr = @ptr
+      @ptr = FFI::AutoPointer.new Cbc.Cbc_newModel,
+                                  Cbc.method(:Cbc_deleteModel)
+      parent_update
+
       Cbc.Cbc_writeMps @ptr, File.join(File.dirname(filename),
                                        File.basename(filename, '.mps'))
       contents = Zlib::GzipReader.open(filename + '.gz').read
       File.delete(filename + '.gz')
       File.open(filename, 'w').write contents
+
+      # Reset to the original model
+      @ptr = old_ptr
+      reset_model
+    end
+
+    alias_method :parent_update, :update
+
+    # Avoid doing anything here. Updating multiple times will
+    # break the model so we defer to #solve.
+    def update
     end
 
     # Set the sense of the model
@@ -35,7 +52,7 @@ module MIPPeR
     # Optimize the model
     def optimize
       # Ensure pending variables and constraints are added
-      update
+      parent_update
 
       # Run the solver and save the status for later
       Cbc.Cbc_solve @ptr
@@ -134,6 +151,15 @@ module MIPPeR
     end
 
     private
+
+    def reset_model
+      @var_count = 0
+      @constr_count = 0
+      @pending_variables = @variables
+      @pending_constraints = @constraints
+      @variables = []
+      @constraints = []
+    end
 
     # Save the constraint to the model and update the constraint pointers
     def store_constraint(constr)
