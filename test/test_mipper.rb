@@ -151,6 +151,15 @@ module MIPPeR
     end
   end
 
+  class ConstrTest
+    def test_inspect_constr
+      x = Variable.new 0, 1, 0, :binary, 'x'
+      c = Constraint.new(x * 1, :<=, 4.0)
+
+      asssert_equal c.inspect, 'x <= 4.0'
+    end
+  end
+
   class ExprTest
     def test_inspect_expr_simple
       x = Variable.new 0, 1, 0, :binary, 'x'

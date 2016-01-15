@@ -13,5 +13,9 @@ module MIPPeR
         var.constraints << self
       end
     end
+
+    def inspect
+      "#{@expression.inspect} #{sense.to_s} #{rhs}"
+    end
   end
 end
