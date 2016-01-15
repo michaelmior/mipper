@@ -41,8 +41,13 @@ module MIPPeR
       @pending_constraints = []
     end
 
-    # Write the model to a file
-    def write(filename)
+    # Write the model to a file in CPLEX LP format
+    def write_lp(filename)
+      fail NotImplementedError
+    end
+
+    # Write the model to a file in MPS format
+    def write_mps(filename)
       fail NotImplementedError
     end
 

@@ -38,6 +38,7 @@ module MIPPeR
     attach_function :glp_mip_row_val, [:pointer, :int], :double
     attach_function :glp_mip_col_val, [:pointer, :int], :double
     attach_function :glp_write_lp, [:pointer, :int, :string], :int
+    attach_function :glp_write_mps, [:pointer, :int, :string, :string], :int
     attach_function :glp_term_out, [:int], :int
   end
 end

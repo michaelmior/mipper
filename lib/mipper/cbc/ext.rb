@@ -32,5 +32,6 @@ module MIPPeR
     attach_function :Cbc_isProvenInfeasible, [:pointer], :int
     attach_function :Cbc_isContinuousUnbounded, [:pointer], :int
     attach_function :Cbc_setParameter, [:pointer, :string, :string], :void
+    attach_function :Cbc_writeMps, [:pointer, :string], :void
   end
 end

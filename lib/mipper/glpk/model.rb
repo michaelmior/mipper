@@ -21,9 +21,15 @@ module MIPPeR
                                   GLPK.method(:glp_delete_prob)
     end
 
-    # Write the model to a file
-    def write(filename)
+    # Write the model to a file in CPLEX LP format
+    def write_lp(filename)
       ret = GLPK.glp_write_lp @ptr, 0, filename
+      fail if ret != 0
+    end
+
+    # Write the model to a file in MPS format
+    def write_mps(filename)
+      ret = GLPK.glp_write_mps @ptr, GLPK::GLP_MPS_FILE, nil, filename
       fail if ret != 0
     end
 

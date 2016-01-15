@@ -1,3 +1,5 @@
+require 'zlib'
+
 module MIPPeR
   class CbcModel < Model
     attr_reader :ptr
@@ -12,6 +14,15 @@ module MIPPeR
       @ptr = FFI::AutoPointer.new Cbc.Cbc_newModel,
                                   Cbc.method(:Cbc_deleteModel)
       Cbc.Cbc_setParameter @ptr, 'logLevel', '0'
+    end
+
+    # Write the model to a file in MPS format
+    def write_mps(filename)
+      Cbc.Cbc_writeMps @ptr, File.join(File.dirname(filename),
+                                       File.basename(filename, '.mps'))
+      contents = Zlib::GzipReader.open(filename + '.gz').read
+      File.delete(filename + '.gz')
+      File.open(filename, 'w').write contents
     end
 
     # Set the sense of the model

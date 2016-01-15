@@ -26,8 +26,13 @@ module MIPPeR
       fail if ret != 0
     end
 
-    # Write the model to a file
-    def write(filename)
+    # Write the model to a file in CPLEX LP format
+    def write_lp(filename)
+      Gurobi.GRBwrite @ptr, filename
+    end
+
+    # Write the model to a file in MPS format
+    def write_mps(filename)
       Gurobi.GRBwrite @ptr, filename
     end
 
