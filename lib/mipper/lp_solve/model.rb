@@ -30,35 +30,8 @@ module MIPPeR
       update
 
       # Run the solver and save the status for later
-      @status = LPSolve.solve @ptr
-    end
-
-    # Get the status of the model
-    def status
-      case @status
-      when LPSolve::OPTIMAL
-        :optimized
-      when LPSolve::INFEASIBLE, LPSolve::UNBOUNDED, LPSolve::DEGENERATE
-        :invalid
-      else
-        :unknown
-      end
-    end
-
-    # The value of the objective function
-    def objective_value
-      LPSolve.get_objective @ptr
-    end
-
-    # Get the value of a variable from the model
-    def variable_value(var)
-      # To access the value of a result variable we need an index into the
-      # solution which setarts with the objective function, followed by all
-      # of the constraints, and finally the variables
-      # We explicitly ask for the number of rows since extra constraints
-      # may have been added
-      rows = LPSolve.get_Nrows(@ptr)
-      LPSolve.get_var_primalresult @ptr, rows + var.index
+      status = LPSolve.solve(@ptr)
+      save_solution status
     end
 
     def set_variable_bounds(var_index, lb, ub)
@@ -89,6 +62,32 @@ module MIPPeR
     end
 
     private
+
+    # Save the solution to the model for access later
+    def save_solution(status)
+      status = case status
+      when LPSolve::OPTIMAL
+        :optimized
+      when LPSolve::INFEASIBLE, LPSolve::UNBOUNDED, LPSolve::DEGENERATE
+        :invalid
+      else
+        :unknown
+      end
+
+      if status == :optimized
+        objective_value = LPSolve.get_objective @ptr
+        rows = LPSolve.get_Nrows(@ptr)
+        variable_values = Hash[@variables.map do |var|
+          value = LPSolve.get_var_primalresult @ptr, rows + var.index
+          [var.name, value]
+        end]
+      else
+        objective_value = nil
+        variable_values = {}
+      end
+
+      @solution = Solution.new status, objective_value, variable_values
+    end
 
     # Save the constraint to the model and update the constraint pointers
     def store_constraint(constr)

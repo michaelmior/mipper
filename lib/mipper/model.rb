@@ -3,6 +3,7 @@ module MIPPeR
     attr_reader :variables, :constraints
 
     def initialize
+      @solution = nil
       @sense = :min
 
       @variables = []
@@ -63,7 +64,11 @@ module MIPPeR
 
     # Get the status of the model
     def status
-      :unknown
+      if @solution.nil?
+        :unknown
+      else
+        @solution.status
+      end
     end
 
     # Compute an irreducible inconsistent subsytem for the model
@@ -73,7 +78,11 @@ module MIPPeR
 
     # The value of the objective function
     def objective_value
-      fail NotImplementedError
+      @solution.objective_value unless @solution.nil?
+    end
+
+    def variable_value(var)
+      @solution.variable_values[var.name] unless @solution.nil?
     end
 
     protected
@@ -87,10 +96,6 @@ module MIPPeR
     end
 
     def set_variable_bounds(var_index, ub, lb)
-      fail NotImplementedError
-    end
-
-    def variable_value(var)
       fail NotImplementedError
     end
   end

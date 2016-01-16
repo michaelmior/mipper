@@ -49,29 +49,9 @@ module MIPPeR
       iocp = GLPK::IOCP.new
       GLPK.glp_init_iocp iocp
       iocp[:presolve] = GLPK::GLP_ON
-      @status = GLPK.glp_intopt @ptr, iocp
-    end
+      status = GLPK.glp_intopt(@ptr, iocp)
 
-    # Get the status of the model
-    def status
-      case @status
-      when 0, GLPK::GLP_EMIPGAP
-        :optimized
-      when GLPK::GLP_EBOUND, GLPK::GLP_EROOT, GLPK::GLP_ENOPFS
-        :invalid
-      else
-        :unknown
-      end
-    end
-
-    # The value of the objective function
-    def objective_value
-      GLPK.glp_mip_obj_val @ptr
-    end
-
-    # Get the value of a variable from the model
-    def variable_value(var)
-      GLPK.glp_mip_col_val(@ptr, var.index)
+      save_solution status
     end
 
     def set_variable_bounds(var_index, lb, ub)
@@ -130,6 +110,31 @@ module MIPPeR
     end
 
     private
+
+    # Save the solution to the model for access later
+    def save_solution(status)
+      status = case status
+               when 0, GLPK::GLP_EMIPGAP
+                 :optimized
+               when GLPK::GLP_EBOUND, GLPK::GLP_EROOT, GLPK::GLP_ENOPFS
+                 :invalid
+               else
+                 :unknown
+               end
+
+      if status == :optimized
+        objective_value = GLPK.glp_mip_obj_val @ptr
+        variable_values = Hash[@variables.map do |var|
+          value = GLPK.glp_mip_col_val(@ptr, var.index)
+          [var.name, value]
+        end]
+      else
+        objective_value = nil
+        variable_values = {}
+      end
+
+      @solution = Solution.new status, objective_value, variable_values
+    end
 
     # Save the constraint to the model and update the constraint pointers
     def store_constraint(constr)

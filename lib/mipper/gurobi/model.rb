@@ -51,23 +51,8 @@ module MIPPeR
 
       ret = Gurobi.GRBoptimize @ptr
       fail if ret != 0
-    end
 
-    # Get the status of the model
-    def status
-      intptr = FFI::MemoryPointer.new :pointer
-      ret = Gurobi.GRBgetintattr @ptr, Gurobi::GRB_INT_ATTR_STATUS, intptr
-      fail if ret != 0
-
-      case intptr.read_int
-      when Gurobi::GRB_OPTIMAL
-        :optimized
-      when Gurobi::GRB_INFEASIBLE, Gurobi::GRB_INF_OR_UNBD,
-           Gurobi::GRB_UNBOUNDED
-        :invalid
-      else
-        :unknown
-      end
+      save_solution
     end
 
     # Compute an irreducible inconsistent subsytem for the model
@@ -76,28 +61,37 @@ module MIPPeR
       fail if ret != 0
     end
 
-    # The value of the objective function
-    def objective_value
-      dblptr = FFI::MemoryPointer.new :pointer
-      ret = Gurobi.GRBgetdblattr @ptr, Gurobi::GRB_DBL_ATTR_OBJVAL, dblptr
-      fail if ret != 0
-      dblptr.read_double
-    end
-
     def set_variable_bounds(var_index, lb, ub)
       set_double_attribute Gurobi::GRB_DBL_ATTR_LB, var_index, lb
       set_double_attribute Gurobi::GRB_DBL_ATTR_UB, var_index, ub
     end
 
-    # Get the value of a variable from the model
-    def variable_value(var)
-      dblptr = FFI::MemoryPointer.new :pointer
-      Gurobi.GRBgetdblattrarray @ptr, Gurobi::GRB_DBL_ATTR_X,
-                                var.index, 1, dblptr
-      dblptr.read_array_of_double(1)[0]
+    protected
+
+    # Get the status of the model
+    def gurobi_status
+      intptr = FFI::MemoryPointer.new :pointer
+      ret = Gurobi.GRBgetintattr @ptr, Gurobi::GRB_INT_ATTR_STATUS, intptr
+      fail if ret != 0
+
+      case intptr.read_int
+      when Gurobi::GRB_OPTIMAL
+        :optimized
+      when Gurobi::GRB_INFEASIBLE, Gurobi::GRB_INF_OR_UNBD,
+        Gurobi::GRB_UNBOUNDED
+        :invalid
+      else
+        :unknown
+      end
     end
 
-    protected
+    # The value of the objective function
+    def gurobi_objective
+      dblptr = FFI::MemoryPointer.new :pointer
+      ret = Gurobi.GRBgetdblattr @ptr, Gurobi::GRB_DBL_ATTR_OBJVAL, dblptr
+      fail if ret != 0
+      dblptr.read_double
+    end
 
     # Add multiple variables to the model simultaneously
     def add_variables(vars)
@@ -204,6 +198,27 @@ module MIPPeR
     # Free the model
     def self.finalize(ptr)
       proc { Gurobi.GRBfreemodel ptr }
+    end
+
+    # Save the solution to the model for access later
+    def save_solution
+      status = gurobi_status
+
+      if status == :optimized
+        objective_value = gurobi_objective
+        variable_values = Hash[@variables.map do |var|
+          dblptr = FFI::MemoryPointer.new :pointer
+          Gurobi.GRBgetdblattrarray @ptr, Gurobi::GRB_DBL_ATTR_X,
+            var.index, 1, dblptr
+          value = dblptr.read_array_of_double(1)[0]
+          [var.name, value]
+        end]
+      else
+        objective_value = nil
+        variable_values = {}
+      end
+
+      @solution = Solution.new status, objective_value, variable_values
     end
 
     # Save the variable to the model and update the variable pointers

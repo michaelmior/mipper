@@ -58,31 +58,7 @@ module MIPPeR
       Cbc.Cbc_solve @ptr
       fail if Cbc.Cbc_status(@ptr) != 0
 
-      # Check and store the model status
-      if Cbc.Cbc_isProvenOptimal(@ptr) == 1
-        @status = :optimized
-      elsif Cbc.Cbc_isProvenInfeasible(@ptr) == 1 or
-            Cbc.Cbc_isContinuousUnbounded(@ptr) == 1
-        @status = :invalid
-      else
-        @status = :unknown
-      end
-    end
-
-    # Get the status of the model
-    def status
-      @status
-    end
-
-    # The value of the objective function
-    def objective_value
-      Cbc.Cbc_getObjValue @ptr
-    end
-
-    # Get the value of a variable from the model
-    def variable_value(var)
-      dblptr = Cbc.Cbc_getColSolution @ptr
-      dblptr.read_array_of_double(@variables.length)[var.index]
+      save_solution
     end
 
     def set_variable_bounds(var_index, lb, ub)
@@ -152,6 +128,34 @@ module MIPPeR
 
     private
 
+    # Save the solution to the model for access later
+    def save_solution
+      # Check and store the model status
+      if Cbc.Cbc_isProvenOptimal(@ptr) == 1
+        status = :optimized
+      elsif Cbc.Cbc_isProvenInfeasible(@ptr) == 1 or
+        Cbc.Cbc_isContinuousUnbounded(@ptr) == 1
+        status = :invalid
+      else
+        status = :unknown
+      end
+
+      if status == :optimized
+        objective_value = Cbc.Cbc_getObjValue @ptr
+        dblptr = Cbc.Cbc_getColSolution @ptr
+        values = dblptr.read_array_of_double(@variables.length)
+        variable_values = Hash[@variables.map do |var|
+          [var.name, values[var.index]]
+        end]
+      else
+        objective_value = nil
+        variable_values = {}
+      end
+
+      @solution = Solution.new status, objective_value, variable_values
+    end
+
+    # Reset the internal state of the model so we can reuse it
     def reset_model
       @var_count = 0
       @constr_count = 0

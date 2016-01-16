@@ -51,14 +51,6 @@ module MIPPeR
       assert_equal var.inspect, 'x = false'
     end
 
-    def test_store_variables
-      x = Variable.new 0, 1, 0, :binary, 'x'
-      @model << x
-      @model.update
-
-      assert_equal @model.variables, [x]
-    end
-
     def test_inspect_expr_skip_zeros
       var = Variable.new 0, 1, 1, :continuous, 'x'
       @model << var
