@@ -1,6 +1,7 @@
 require 'zlib'
 
 module MIPPeR
+  # A linear programming model using the COIN-OR solver
   class CbcModel < Model
     attr_reader :ptr
 
@@ -133,8 +134,8 @@ module MIPPeR
       # Check and store the model status
       if Cbc.Cbc_isProvenOptimal(@ptr) == 1
         status = :optimized
-      elsif Cbc.Cbc_isProvenInfeasible(@ptr) == 1 or
-        Cbc.Cbc_isContinuousUnbounded(@ptr) == 1
+      elsif Cbc.Cbc_isProvenInfeasible(@ptr) == 1 ||
+            Cbc.Cbc_isContinuousUnbounded(@ptr) == 1
         status = :invalid
       else
         status = :unknown
@@ -195,21 +196,23 @@ module MIPPeR
         var.instance_variable_set(:@lower_bound, 0)
         var.instance_variable_set(:@upper_bound, 1)
       end
+      set_variable_bounds var.index, var.lower_bound, var.upper_bound
 
-      Cbc.Cbc_setColLower @ptr, var.index, var.lower_bound
-      Cbc.Cbc_setColUpper @ptr, var.index, var.upper_bound
       Cbc.Cbc_setObjCoeff @ptr, var.index, var.coefficient
+      Cbc.Cbc_setColName(@ptr, var.index, var.name) unless var.name.nil?
+      set_variable_type var.index, var.type
+    end
 
-      case var.type
+    # Set the type of a variable
+    def set_variable_type(index, type)
+      case type
       when :continuous
-        Cbc.Cbc_setContinuous @ptr, var.index
+        Cbc.Cbc_setContinuous @ptr, index
       when :integer, :binary
-        Cbc.Cbc_setInteger @ptr, var.index
+        Cbc.Cbc_setInteger @ptr, index
       else
         fail :type
       end
-
-      Cbc.Cbc_setColName(@ptr, var.index, var.name) unless var.name.nil?
     end
   end
 end
