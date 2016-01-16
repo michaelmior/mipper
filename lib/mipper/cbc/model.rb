@@ -87,6 +87,25 @@ module MIPPeR
         @constr_count += 1
       end
 
+      start, index, value = build_constraint_matrix
+      start_buffer = FFI::MemoryPointer.new :int, start.length
+      start_buffer.write_array_of_int start
+      index_buffer = FFI::MemoryPointer.new :int, index.length
+      index_buffer.write_array_of_int index
+      value_buffer = FFI::MemoryPointer.new :double, value.length
+      value_buffer.write_array_of_double value
+
+      Cbc.Cbc_loadProblem @ptr, @variables.length, constrs.length,
+                          start_buffer, index_buffer, value_buffer,
+                          nil, nil, nil, nil, nil
+
+      store_model constrs, vars
+    end
+
+    private
+
+    # Build a constraint matrix for the currently existing variables
+    def build_constraint_matrix
       # Construct a matrix of non-zero values in CSC format
       start = []
       index = []
@@ -104,30 +123,23 @@ module MIPPeR
       end
       start << col_start
 
-      start_buffer = FFI::MemoryPointer.new :int, start.length
-      start_buffer.write_array_of_int start
-      index_buffer = FFI::MemoryPointer.new :int, index.length
-      index_buffer.write_array_of_int index
-      value_buffer = FFI::MemoryPointer.new :double, value.length
-      value_buffer.write_array_of_double value
+      [start, index, value]
+    end
 
-      Cbc.Cbc_loadProblem @ptr, @variables.length, constrs.length,
-                          start_buffer, index_buffer, value_buffer,
-                          nil, nil, nil, nil, nil
-
+    # Store all data for the model
+    def store_model(constrs, vars)
+      # Store all constraints
       constrs.each do |constr|
         store_constraint constr
         @constraints << constr
       end
 
       # We store variables now since they didn't exist earlier
-      @variables.each_with_index do |var, i|
+      vars.each_with_index do |var, i|
         var.instance_variable_set(:@index, i)
         store_variable var
       end
     end
-
-    private
 
     # Save the solution to the model for access later
     def save_solution
