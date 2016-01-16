@@ -1,4 +1,5 @@
 module MIPPeR
+  # A linear programming model using the Gurobi solver
   class GurobiModel < Model
     attr_reader :ptr, :environment
 
@@ -56,7 +57,7 @@ module MIPPeR
     end
 
     # Compute an irreducible inconsistent subsytem for the model
-    def compute_IIS
+    def compute_iis
       ret = Gurobi.GRBcomputeIIS @ptr
       fail if ret != 0
     end
@@ -140,7 +141,7 @@ module MIPPeR
       cbeg = []
       cind = []
       cval = []
-      constrs.each_with_index.map do |constr, i|
+      constrs.each.map do |constr|
         cbeg << cind.length
         constr.expression.terms.each do |var, coeff|
           cind << var.instance_variable_get(:@index)
@@ -213,7 +214,7 @@ module MIPPeR
         variable_values = Hash[@variables.map do |var|
           dblptr = FFI::MemoryPointer.new :pointer
           Gurobi.GRBgetdblattrarray @ptr, Gurobi::GRB_DBL_ATTR_X,
-            var.index, 1, dblptr
+                                    var.index, 1, dblptr
           value = dblptr.read_array_of_double(1)[0]
           [var.name, value]
         end]
