@@ -74,10 +74,8 @@ module MIPPeR
         colno << var.instance_variable_get(:@index)
       end
 
-      row_buffer = FFI::MemoryPointer.new :pointer, row.length
-      row_buffer.write_array_of_double row
-      colno_buffer = FFI::MemoryPointer.new :pointer, colno.length
-      colno_buffer.write_array_of_int colno
+      row_buffer = build_pointer_array row, :double
+      colno_buffer = build_pointer_array colno, :int
 
       ret = LPSolve.add_constraintex(@ptr, constr.expression.terms.length,
                                      row_buffer, colno_buffer,

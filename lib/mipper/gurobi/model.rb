@@ -96,21 +96,14 @@ module MIPPeR
 
     # Add multiple variables to the model simultaneously
     def add_variables(vars)
-      objective_buffer = FFI::MemoryPointer.new :double, vars.length
-      objective_buffer.write_array_of_double vars.map(&:coefficient)
-
-      lb_buffer = FFI::MemoryPointer.new :double, vars.length
-      lb_buffer.write_array_of_double vars.map(&:lower_bound)
-
-      ub_buffer = FFI::MemoryPointer.new :double, vars.length
-      ub_buffer.write_array_of_double vars.map(&:upper_bound)
-
-      type_buffer = FFI::MemoryPointer.new :char, vars.length
-      type_buffer.write_array_of_char vars.map { |var| gurobi_type(var.type) }
-
-      names = array_to_pointers_to_names vars
-      names_buffer = FFI::MemoryPointer.new :pointer, vars.length
-      names_buffer.write_array_of_pointer names
+      objective_buffer = build_pointer_array vars.map(&:coefficient), :double
+      lb_buffer = build_pointer_array vars.map(&:lower_bound), :double
+      ub_buffer = build_pointer_array vars.map(&:upper_bound), :double
+      type_buffer = build_pointer_array(vars.map do |var|
+        gurobi_type(var.type)
+      end, :char)
+      names_buffer = build_pointer_array array_to_pointers_to_names(vars),
+                                         :pointer
 
       ret = Gurobi.GRBaddvars @ptr, vars.length, 0, nil, nil, nil,
                               objective_buffer, lb_buffer, ub_buffer,
@@ -140,25 +133,16 @@ module MIPPeR
     def add_constraints(constrs)
       cbeg, cind, cval = build_constraint_matrix constrs
 
-      cbeg_buffer = FFI::MemoryPointer.new :pointer, cbeg.length
-      cbeg_buffer.write_array_of_int cbeg
-
-      cind_buffer = FFI::MemoryPointer.new :pointer, cind.length
-      cind_buffer.write_array_of_int cind
-
-      cval_buffer = FFI::MemoryPointer.new :pointer, cval.length
-      cval_buffer.write_array_of_double cval
-
-      sense_buffer = FFI::MemoryPointer.new :pointer, constrs.length
-      sense_buffer.write_array_of_char(constrs.map do |c|
+      cbeg_buffer = build_pointer_array cbeg, :int
+      cind_buffer = build_pointer_array cind, :int
+      cval_buffer = build_pointer_array cval, :double
+      sense_buffer = build_pointer_array(constrs.map do |c|
         gurobi_sense(c.sense)
-      end)
+      end, :char)
+      rhs_buffer = build_pointer_array constrs.map(&:rhs), :double
 
-      rhs_buffer = FFI::MemoryPointer.new :pointer, constrs.length
-      rhs_buffer.write_array_of_double constrs.map(&:rhs)
-
-      names_buffer = FFI::MemoryPointer.new :pointer, constrs.length
-      names_buffer.write_array_of_pointer array_to_pointers_to_names(constrs)
+      names_buffer = build_pointer_array array_to_pointers_to_names(constrs),
+                                         :pointer
 
       ret = Gurobi.GRBaddconstrs @ptr, constrs.length, cind.length,
                                  cbeg_buffer, cind_buffer, cval_buffer,
@@ -171,13 +155,10 @@ module MIPPeR
     # Add a new constraint to the model
     def add_constraint(constr)
       terms = constr.expression.terms
-      indexes_buffer = FFI::MemoryPointer.new :int, terms.length
-      indexes_buffer.write_array_of_int(terms.each_key.map do |var|
+      indexes_buffer = build_pointer_array(terms.each_key.map do |var|
         var.instance_variable_get(:@index)
-      end)
-
-      values_buffer = FFI::MemoryPointer.new :double, terms.length
-      values_buffer.write_array_of_double terms.values
+      end, :int)
+      values_buffer = build_pointer_array terms.values, :double
 
       ret = Gurobi.GRBaddconstr @ptr, terms.length,
                                 indexes_buffer, values_buffer,
@@ -243,8 +224,7 @@ module MIPPeR
     end
 
     def set_double_attribute(name, var_index, value)
-      buffer = FFI::MemoryPointer.new :double, 1
-      buffer.write_array_of_double [value]
+      buffer = build_pointer_array [value], :double
       ret = Gurobi.GRBsetdblattrarray @ptr, name, var_index, 1, buffer
       fail if ret != 0
     end

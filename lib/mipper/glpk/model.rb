@@ -96,12 +96,9 @@ module MIPPeR
         end
       end
 
-      ia_buffer = FFI::MemoryPointer.new :pointer, @ia.length
-      ia_buffer.write_array_of_int @ia
-      ja_buffer = FFI::MemoryPointer.new :pointer, @ja.length
-      ja_buffer.write_array_of_int @ja
-      ar_buffer = FFI::MemoryPointer.new :pointer, @ar.length
-      ar_buffer.write_array_of_double @ar
+      ia_buffer = build_pointer_array @ia, :int
+      ja_buffer = build_pointer_array @ja, :int
+      ar_buffer = build_pointer_array @ar, :double
 
       GLPK.glp_load_matrix(@ptr, @ar.length - 1, ia_buffer, ja_buffer,
                            ar_buffer)

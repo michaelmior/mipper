@@ -78,6 +78,14 @@ module MIPPeR
 
     protected
 
+    # Shortcut to build a C array from a Ruby array
+    def build_pointer_array(array, type)
+      buffer = FFI::MemoryPointer.new type, array.length
+      buffer.send("write_array_of_#{type}".to_sym,  array)
+
+      buffer
+    end
+
     # Just add the variable as an array
     def add_variable(var)
       add_variables([var])

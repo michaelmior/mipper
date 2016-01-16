@@ -25,8 +25,7 @@ module MIPPeR
                                   Cbc.method(:Cbc_deleteModel)
       parent_update
 
-      Cbc.Cbc_writeMps @ptr, File.join(File.dirname(filename),
-                                       File.basename(filename, '.mps'))
+      Cbc.Cbc_writeMps @ptr, filename.chomp('.mps')
       contents = Zlib::GzipReader.open(filename + '.gz').read
       File.delete(filename + '.gz')
       File.open(filename, 'w').write contents
@@ -81,19 +80,10 @@ module MIPPeR
 
     # Add multiple constraints at once
     def add_constraints(constrs)
-      # Store the index which will be used for each constraint
-      constrs.each do |constr|
-        constr.instance_variable_set :@index, @constr_count
-        @constr_count += 1
-      end
-
-      start, index, value = build_constraint_matrix
-      start_buffer = FFI::MemoryPointer.new :int, start.length
-      start_buffer.write_array_of_int start
-      index_buffer = FFI::MemoryPointer.new :int, index.length
-      index_buffer.write_array_of_int index
-      value_buffer = FFI::MemoryPointer.new :double, value.length
-      value_buffer.write_array_of_double value
+      start, index, value = build_constraint_matrix constrs
+      start_buffer = build_pointer_array start, :int
+      index_buffer = build_pointer_array index, :int
+      value_buffer = build_pointer_array value, :double
 
       Cbc.Cbc_loadProblem @ptr, @variables.length, constrs.length,
                           start_buffer, index_buffer, value_buffer,
@@ -104,8 +94,18 @@ module MIPPeR
 
     private
 
+    # Store the index which will be used for each constraint
+    def store_constraint_indexes(constrs)
+      constrs.each do |constr|
+        constr.instance_variable_set :@index, @constr_count
+        @constr_count += 1
+      end
+    end
+
     # Build a constraint matrix for the currently existing variables
-    def build_constraint_matrix
+    def build_constraint_matrix(constrs)
+      store_constraint_indexes constrs
+
       # Construct a matrix of non-zero values in CSC format
       start = []
       index = []
@@ -186,17 +186,22 @@ module MIPPeR
 
       # Set constraint properties
       Cbc.Cbc_setRowName(@ptr, index, constr.name) unless constr.name.nil?
+      store_constraint_bounds index, constr.sense, constr.rhs
+    end
 
-      case constr.sense
+    # Store the bounds for a given constraint
+    def store_constraint_bounds(index, sense, rhs)
+      case sense
       when :==
-        lb = ub = constr.rhs
+        lb = ub = rhs
       when :>=
-        lb = constr.rhs
+        lb = rhs
         ub = Float::INFINITY
       when :<=
         lb = -Float::INFINITY
-        ub = constr.rhs
+        ub = rhs
       end
+
       Cbc.Cbc_setRowLower @ptr, index, lb
       Cbc.Cbc_setRowUpper @ptr, index, ub
     end
