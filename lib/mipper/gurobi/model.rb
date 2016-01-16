@@ -138,16 +138,7 @@ module MIPPeR
 
     # Add multiple constraints at once
     def add_constraints(constrs)
-      cbeg = []
-      cind = []
-      cval = []
-      constrs.each.map do |constr|
-        cbeg << cind.length
-        constr.expression.terms.each do |var, coeff|
-          cind << var.instance_variable_get(:@index)
-          cval << coeff
-        end
-      end
+      cbeg, cind, cval = build_constraint_matrix constrs
 
       cbeg_buffer = FFI::MemoryPointer.new :pointer, cbeg.length
       cbeg_buffer.write_array_of_int cbeg
@@ -166,9 +157,8 @@ module MIPPeR
       rhs_buffer = FFI::MemoryPointer.new :pointer, constrs.length
       rhs_buffer.write_array_of_double constrs.map(&:rhs)
 
-      names = array_to_pointers_to_names constrs
       names_buffer = FFI::MemoryPointer.new :pointer, constrs.length
-      names_buffer.write_array_of_pointer names
+      names_buffer.write_array_of_pointer array_to_pointers_to_names(constrs)
 
       ret = Gurobi.GRBaddconstrs @ptr, constrs.length, cind.length,
                                  cbeg_buffer, cind_buffer, cval_buffer,
@@ -203,6 +193,22 @@ module MIPPeR
     # Free the model
     def self.finalize(ptr)
       proc { Gurobi.GRBfreemodel ptr }
+    end
+
+    # Construct a matrix of values for the given list of constraints
+    def build_constraint_matrix(constrs)
+      cbeg = []
+      cind = []
+      cval = []
+      constrs.each.map do |constr|
+        cbeg << cind.length
+        constr.expression.terms.each do |var, coeff|
+          cind << var.instance_variable_get(:@index)
+          cval << coeff
+        end
+      end
+
+      [cbeg, cind, cval]
     end
 
     # Save the solution to the model for access later
