@@ -103,7 +103,7 @@ module MIPPeR
       @model.update
 
       @model.optimize
-      @model.compute_IIS
+      @model.compute_iis
     end
   end
 

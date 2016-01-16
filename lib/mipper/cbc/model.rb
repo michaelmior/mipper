@@ -99,7 +99,7 @@ module MIPPeR
                           start_buffer, index_buffer, value_buffer,
                           nil, nil, nil, nil, nil
 
-      store_model constrs, vars
+      store_model constrs, @variables
     end
 
     private
