@@ -1,4 +1,5 @@
 module MIPPeR
+  # A linear programming model using the lp_solve solver
   class LPSolveModel < Model
     attr_reader :ptr
 
@@ -63,16 +64,38 @@ module MIPPeR
 
     private
 
+    # Build the constraint matrix and add it to the model
+    def store_constraint_matrix(constr, type)
+      # Initialize arrays used to hold the coefficients for each variable
+      row = []
+      colno = []
+      constr.expression.terms.each do |var, coeff|
+        row << coeff * 1.0
+        colno << var.instance_variable_get(:@index)
+      end
+
+      row_buffer = FFI::MemoryPointer.new :pointer, row.length
+      row_buffer.write_array_of_double row
+      colno_buffer = FFI::MemoryPointer.new :pointer, colno.length
+      colno_buffer.write_array_of_int colno
+
+      ret = LPSolve.add_constraintex(@ptr, constr.expression.terms.length,
+                                     row_buffer, colno_buffer,
+                                     type, constr.rhs)
+      fail if ret != 1
+    end
+
     # Save the solution to the model for access later
     def save_solution(status)
       status = case status
-      when LPSolve::OPTIMAL
-        :optimized
-      when LPSolve::INFEASIBLE, LPSolve::UNBOUNDED, LPSolve::DEGENERATE
-        :invalid
-      else
-        :unknown
-      end
+               when LPSolve::OPTIMAL
+                 :optimized
+               when LPSolve::INFEASIBLE, LPSolve::UNBOUNDED,
+                    LPSolve::DEGENERATE
+                 :invalid
+               else
+                 :unknown
+               end
 
       if status == :optimized
         objective_value = LPSolve.get_objective @ptr
@@ -113,24 +136,7 @@ module MIPPeR
         type = LPSolve::LE
       end
 
-      # Initialize arrays used to hold the coefficients for each variable
-      row = []
-      colno = []
-      constr.expression.terms.each do |var, coeff|
-        row << coeff * 1.0
-        colno << var.instance_variable_get(:@index)
-      end
-
-      row_buffer = FFI::MemoryPointer.new :pointer, row.length
-      row_buffer.write_array_of_double row
-      colno_buffer = FFI::MemoryPointer.new :pointer, colno.length
-      colno_buffer.write_array_of_int colno
-
-      ret = LPSolve.add_constraintex(@ptr, constr.expression.terms.length,
-                                     row_buffer, colno_buffer,
-                                     type, constr.rhs)
-      fail if ret != 1
-
+      store_constraint_matrix constr, type
       @constraints << constr
     end
 
@@ -146,17 +152,7 @@ module MIPPeR
       fail if ret != 1
 
       # Set variable properties
-      case var.type
-      when :integer
-        ret = LPSolve.set_int @ptr, index, 1
-      when :binary
-        ret = LPSolve.set_binary @ptr, index, 1
-      when :continuous
-        ret = LPSolve.set_int @ptr, index, 0
-      else
-        fail type
-      end
-      fail if ret != 1
+      set_variable_type index, var.type
 
       ret = LPSolve.set_col_name(@ptr, index, var.name)
       fail if ret != 1
@@ -167,6 +163,22 @@ module MIPPeR
       set_variable_bounds index, var.lower_bound, var.upper_bound
 
       @variables << var
+    end
+
+    # Set the type of a variable
+    def set_variable_type(index, type)
+      case type
+      when :integer
+        ret = LPSolve.set_int @ptr, index, 1
+      when :binary
+        ret = LPSolve.set_binary @ptr, index, 1
+      when :continuous
+        ret = LPSolve.set_int @ptr, index, 0
+      else
+        fail type
+      end
+
+      fail if ret != 1
     end
   end
 end
