@@ -9,19 +9,14 @@ module MIPPeR
       z = Variable.new(0, 1, 2, :binary, 'z')
       vars = [x, y, z]
       vars.each { |var| @model << var }
-      @model.sense = :max
-      @model.update
 
       @model << Constraint.new(x + y * 2 + z * 3, :<=, 4.0, 'c0')
       @model << Constraint.new(x + y, :>=, 1.0, 'c1')
 
-      @model.update
+      @model.sense = :max
       @model.optimize
 
-      assert_equal x.value, true
-      assert_equal y.value, false
-      assert_equal z.value, true
-
+      assert_equal vars.map(&:value), [true, false, true]
       assert_in_delta @model.objective_value, 3, 0.001
     end
 
@@ -157,32 +152,32 @@ module MIPPeR
       x = Variable.new 0, 1, 0, :binary, 'x'
       y = Variable.new 0, 1, 0, :binary, 'y'
 
-      assert_equal (x + y).inspect, 'x + y'
+      assert_equal((x + y).inspect, 'x + y')
     end
 
     def test_inspect_expr_coeffs
       x = Variable.new 0, 1, 0, :binary, 'x'
       y = Variable.new 0, 1, 0, :binary, 'y'
 
-      assert_equal (x * 2 + y).inspect, 'x * 2 + y'
+      assert_equal((x * 2 + y).inspect, 'x * 2 + y')
     end
 
     def test_expr_add_expr
       x = Variable.new(0, 1, 1, :binary, 'x')
       y = Variable.new(0, 1, 1, :binary, 'y')
-      expr = LinExpr.new({x => 1.0})
-      expr.add LinExpr.new({y => 1.0})
+      expr = LinExpr.new(x => 1.0)
+      expr.add LinExpr.new(y => 1.0)
 
-      assert_equal expr.terms, { x => 1.0, y => 1.0}
+      assert_equal expr.terms, x => 1.0, y => 1.0
     end
 
     def test_expr_add_var
       x = Variable.new(0, 1, 1, :binary, 'x')
       y = Variable.new(0, 1, 1, :binary, 'y')
-      expr = LinExpr.new({x => 1.0})
+      expr = LinExpr.new(x => 1.0)
       expr.add y
 
-      assert_equal expr.terms, { x => 1.0, y => 1.0}
+      assert_equal expr.terms, x => 1.0, y => 1.0
     end
   end
 end

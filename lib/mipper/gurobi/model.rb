@@ -119,6 +119,10 @@ module MIPPeR
 
       # Store all the variables in the model
       vars.each { |var| store_variable var }
+
+      # Update the model with variables so constraint adds succeed
+      ret = Gurobi.GRBupdatemodel @ptr
+      fail if ret != 0
     end
 
     # Add a new variable to the model
