@@ -4,6 +4,8 @@ module MIPPeR
     attr_reader :ptr
 
     def initialize
+      fail unless MIPPeR.const_defined?(:LPSolve)
+
       super
 
       @var_count = 0

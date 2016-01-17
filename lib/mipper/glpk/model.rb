@@ -3,6 +3,8 @@ module MIPPeR
     attr_reader :ptr
 
     def initialize
+      fail unless MIPPeR.const_defined?(:GLPK)
+
       super
 
       @var_count = 0

@@ -4,6 +4,8 @@ module MIPPeR
     attr_reader :ptr, :environment
 
     def initialize
+      fail unless MIPPeR.const_defined?(:Gurobi)
+
       super
 
       @var_count = 0

@@ -6,6 +6,8 @@ module MIPPeR
     attr_reader :ptr
 
     def initialize
+      fail unless MIPPeR.const_defined?(:Cbc)
+
       super
 
       @var_count = 0
