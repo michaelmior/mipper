@@ -12,17 +12,14 @@ module MIPPeR
       @constr_count = 0
 
       # Construct a new model
-      @ptr = FFI::AutoPointer.new Cbc.Cbc_newModel,
-                                  Cbc.method(:Cbc_deleteModel)
-      Cbc.Cbc_setParameter @ptr, 'logLevel', '0'
+      @ptr = new_model
     end
 
     # Write the model to a file in MPS format
     def write_mps(filename)
       # Make a new model and ensure everything is added
       old_ptr = @ptr
-      @ptr = FFI::AutoPointer.new Cbc.Cbc_newModel,
-                                  Cbc.method(:Cbc_deleteModel)
+      @ptr = new_model
       parent_update
 
       Cbc.Cbc_writeMps @ptr, filename.chomp('.mps')
@@ -59,9 +56,17 @@ module MIPPeR
       fail if Cbc.Cbc_status(@ptr) != 0
 
       save_solution
+
+      @ptr = new_model
+      reset_model
     end
 
-    def set_variable_bounds(var_index, lb, ub)
+    # Set the bounds of a variable in the model
+    def set_variable_bounds(var_index, lb, ub, force = false)
+      # This is a bit of a hack so that we don't try to set
+      # the variable bounds before they get added to the model
+      return unless force
+
       Cbc.Cbc_setColLower @ptr, var_index, lb
       Cbc.Cbc_setColUpper @ptr, var_index, ub
     end
@@ -93,6 +98,15 @@ module MIPPeR
     end
 
     private
+
+    # Construct a new model object
+    def new_model
+      ptr = FFI::AutoPointer.new Cbc.Cbc_newModel,
+                                 Cbc.method(:Cbc_deleteModel)
+      Cbc.Cbc_setParameter ptr, 'logLevel', '0'
+
+      ptr
+    end
 
     # Store the index which will be used for each constraint
     def store_constraint_indexes(constrs)
@@ -213,7 +227,7 @@ module MIPPeR
         var.instance_variable_set(:@lower_bound, 0)
         var.instance_variable_set(:@upper_bound, 1)
       end
-      set_variable_bounds var.index, var.lower_bound, var.upper_bound
+      set_variable_bounds var.index, var.lower_bound, var.upper_bound, true
 
       Cbc.Cbc_setObjCoeff @ptr, var.index, var.coefficient
       Cbc.Cbc_setColName(@ptr, var.index, var.name) unless var.name.nil?
