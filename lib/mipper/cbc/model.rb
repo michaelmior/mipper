@@ -105,7 +105,11 @@ module MIPPeR
     def new_model
       ptr = FFI::AutoPointer.new Cbc.Cbc_newModel,
                                  Cbc.method(:Cbc_deleteModel)
-      Cbc.Cbc_setParameter ptr, 'logLevel', '0'
+
+      # Older versions of COIN-OR do not support setting the log level via
+      # the C interface in which case setParameter will not be defined
+      Cbc.Cbc_setParameter ptr, 'logLevel', '0' \
+        if Cbc.respond_to?(:Cbc_setParameter)
 
       ptr
     end
