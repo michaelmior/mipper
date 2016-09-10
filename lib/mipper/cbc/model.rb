@@ -80,7 +80,8 @@ module MIPPeR
       # Store all the variables in the model
       # Most of the work will be done when we add the constraints
       vars.each do |var|
-        var.instance_variable_set :@model, self
+        var.model = self
+        var.index = @variables.count
         @variables << var
       end
     end
@@ -117,7 +118,8 @@ module MIPPeR
     # Store the index which will be used for each constraint
     def store_constraint_indexes(constrs)
       constrs.each do |constr|
-        constr.instance_variable_set :@index, @constr_count
+        constr.model = self
+        constr.index = @constr_count
         @constr_count += 1
       end
     end
@@ -137,7 +139,7 @@ module MIPPeR
 
         var.constraints.each do |constr|
           col_start += 1
-          index << constr.instance_variable_get(:@index)
+          index << constr.index
           value << constr.expression.terms[var]
         end
       end
@@ -156,7 +158,8 @@ module MIPPeR
 
       # We store variables now since they didn't exist earlier
       vars.each_with_index do |var, i|
-        var.instance_variable_set(:@index, i)
+        var.index = i
+        var.model = self
         store_variable var
       end
     end
@@ -178,7 +181,7 @@ module MIPPeR
         dblptr = Cbc.Cbc_getColSolution @ptr
         values = dblptr.read_array_of_double(@variables.length)
         variable_values = Hash[@variables.map do |var|
-          [var.name, values[var.index]]
+          [var.index, values[var.index]]
         end]
       else
         objective_value = nil
@@ -201,12 +204,11 @@ module MIPPeR
     # Save the constraint to the model and update the constraint pointers
     def store_constraint(constr)
       # Update the constraint to track the index in the model
-      index = constr.instance_variable_get(:@index)
-      constr.instance_variable_set :@model, self
+      constr.model = self
 
       # Set constraint properties
-      Cbc.Cbc_setRowName(@ptr, index, constr.name) unless constr.name.nil?
-      store_constraint_bounds index, constr.sense, constr.rhs
+      Cbc.Cbc_setRowName(@ptr, constr.index, constr.name) unless constr.name.nil?
+      store_constraint_bounds constr.index, constr.sense, constr.rhs
     end
 
     # Store the bounds for a given constraint

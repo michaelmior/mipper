@@ -92,8 +92,8 @@ module MIPPeR
       constrs.each do |constr|
         store_constraint constr
         constr.expression.terms.each do |var, coeff|
-          @ia << constr.instance_variable_get(:@index)
-          @ja << var.instance_variable_get(:@index)
+          @ia << constr.index
+          @ja << var.index
           @ar << coeff
         end
       end
@@ -125,7 +125,7 @@ module MIPPeR
         objective_value = GLPK.glp_mip_obj_val @ptr
         variable_values = Hash[@variables.map do |var|
           value = GLPK.glp_mip_col_val(@ptr, var.index)
-          [var.name, value]
+          [var.index, value]
         end]
       else
         objective_value = nil
@@ -139,8 +139,9 @@ module MIPPeR
     def store_constraint(constr)
       # Update the constraint to track the index in the model
       index = @constr_count + 1
-      constr.instance_variable_set :@model, self
-      constr.instance_variable_set :@index, index
+      constr.model = self
+      constr.index = index
+      constr.freeze
       @constr_count += 1
 
       # Set constraint properties
@@ -166,8 +167,8 @@ module MIPPeR
     def store_variable(var)
       # Update the variable to track the index in the model
       index = @var_count + 1
-      var.instance_variable_set :@model, self
-      var.instance_variable_set :@index, index
+      var.model = self
+      var.index = index
       @var_count += 1
 
       @variables << var

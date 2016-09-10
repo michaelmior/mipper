@@ -151,14 +151,19 @@ module MIPPeR
                                  sense_buffer, rhs_buffer, names_buffer
       fail if ret != 0
 
-      @constraints.concat constrs
+      constrs.each do |constr|
+        constr.model = self
+        constr.index = @constraints.length
+        constr.freeze
+        @constraints << constr
+      end
     end
 
     # Add a new constraint to the model
     def add_constraint(constr)
       terms = constr.expression.terms
       indexes_buffer = build_pointer_array(terms.each_key.map do |var|
-        var.instance_variable_get(:@index)
+        var.index
       end, :int)
       values_buffer = build_pointer_array terms.values, :double
 
@@ -168,6 +173,9 @@ module MIPPeR
                                 constr.rhs, constr.name
       fail if ret != 0
 
+      constr.model = self
+      constr.index = @constraints.length
+      constr.freeze
       @constraints << constr
     end
 
@@ -186,7 +194,7 @@ module MIPPeR
       constrs.each.map do |constr|
         cbeg << cind.length
         constr.expression.terms.each do |var, coeff|
-          cind << var.instance_variable_get(:@index)
+          cind << var.index
           cval << coeff
         end
       end
@@ -205,7 +213,7 @@ module MIPPeR
           Gurobi.GRBgetdblattrarray @ptr, Gurobi::GRB_DBL_ATTR_X,
                                     var.index, 1, dblptr
           value = dblptr.read_array_of_double(1)[0]
-          [var.name, value]
+          [var.index, value]
         end]
       else
         objective_value = nil
@@ -218,8 +226,8 @@ module MIPPeR
     # Save the variable to the model and update the variable pointers
     def store_variable(var)
       # Update the variable to track the index in the model
-      var.instance_variable_set :@model, self
-      var.instance_variable_set :@index, @var_count
+      var.model = self
+      var.index = @var_count
       @var_count += 1
 
       @variables << var

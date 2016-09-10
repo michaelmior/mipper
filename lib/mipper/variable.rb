@@ -1,8 +1,7 @@
 module MIPPeR
   class Variable
-    attr_accessor :constraints
-    attr_reader :lower_bound, :upper_bound, :coefficient, :type, :name, :model,
-                :index
+    attr_accessor :constraints, :model, :index
+    attr_reader :lower_bound, :upper_bound, :coefficient, :type, :name
 
     def initialize(lb, ub, coeff, type, name = nil)
       @lower_bound = lb

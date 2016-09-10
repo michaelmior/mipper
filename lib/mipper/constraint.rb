@@ -1,5 +1,6 @@
 module MIPPeR
   class Constraint
+    attr_accessor :model, :index
     attr_reader :expression, :sense, :rhs, :name
 
     def initialize(expr, sense, rhs, name = nil)

@@ -73,7 +73,7 @@ module MIPPeR
 
     # Get the value of a variable from a previous solution
     def variable_value(var)
-      @solution.variable_values[var.name] unless @solution.nil?
+      @solution.variable_values[var.index] unless @solution.nil?
     end
 
     protected

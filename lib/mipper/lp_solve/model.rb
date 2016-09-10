@@ -73,7 +73,7 @@ module MIPPeR
       colno = []
       constr.expression.terms.each do |var, coeff|
         row << coeff * 1.0
-        colno << var.instance_variable_get(:@index)
+        colno << var.index
       end
 
       row_buffer = build_pointer_array row, :double
@@ -102,7 +102,7 @@ module MIPPeR
         rows = LPSolve.get_Nrows(@ptr)
         variable_values = Hash[@variables.map do |var|
           value = LPSolve.get_var_primalresult @ptr, rows + var.index
-          [var.name, value]
+          [var.index, value]
         end]
       else
         objective_value = nil
@@ -116,8 +116,9 @@ module MIPPeR
     def store_constraint(constr)
       # Update the constraint to track the index in the model
       index = LPSolve.get_Nrows(@ptr)
-      constr.instance_variable_set :@model, self
-      constr.instance_variable_set :@index, index
+      constr.model = self
+      constr.index = index
+      constr.freeze
       @constr_count += 1
 
       # Set constraint properties
@@ -144,8 +145,9 @@ module MIPPeR
     def store_variable(var)
       # Update the variable to track the index in the model
       index = @var_count + 1
-      var.instance_variable_set :@model, self
-      var.instance_variable_set :@index, index
+      var.model = self
+      var.index = index
+      var.freeze
       @var_count += 1
 
       ret = LPSolve.add_columnex @ptr, 0, nil, nil
