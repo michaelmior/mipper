@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name        = 'mipper'
-  s.version     = '0.0.7'
-  s.license     = 'GPLv3'
+  s.version     = '0.0.8'
+  s.license     = 'GPL-3.0'
 
   s.summary     = 'A Ruby interface to various MIP solvers'
   s.description = 'MIPPeR is a Ruby interface to various mixed integer programming solvers'
