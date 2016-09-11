@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'mipper'
-  s.version     = '0.0.8'
+  s.version     = '0.0.9'
   s.license     = 'GPL-3.0'
 
   s.summary     = 'A Ruby interface to various MIP solvers'
