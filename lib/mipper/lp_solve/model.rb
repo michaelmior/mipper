@@ -100,13 +100,14 @@ module MIPPeR
       if status == :optimized
         objective_value = LPSolve.get_objective @ptr
         rows = LPSolve.get_Nrows(@ptr)
-        variable_values = Hash[@variables.map do |var|
-          value = LPSolve.get_var_primalresult @ptr, rows + var.index
-          [var.index, value]
-        end]
+        variable_values = [nil]
+        @variables.each do |var|
+          variable_values << LPSolve.get_var_primalresult(@ptr,
+                                                          rows + var.index)
+        end
       else
         objective_value = nil
-        variable_values = {}
+        variable_values = []
       end
 
       @solution = Solution.new status, objective_value, variable_values

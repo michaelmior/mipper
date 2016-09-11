@@ -179,13 +179,10 @@ module MIPPeR
       if status == :optimized
         objective_value = Cbc.Cbc_getObjValue @ptr
         dblptr = Cbc.Cbc_getColSolution @ptr
-        values = dblptr.read_array_of_double(@variables.length)
-        variable_values = Hash[@variables.map do |var|
-          [var.index, values[var.index]]
-        end]
+        variable_values = dblptr.read_array_of_double(@variables.length)
       else
         objective_value = nil
-        variable_values = {}
+        variable_values = []
       end
 
       @solution = Solution.new status, objective_value, variable_values

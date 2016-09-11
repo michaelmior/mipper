@@ -208,16 +208,15 @@ module MIPPeR
 
       if status == :optimized
         objective_value = gurobi_objective
-        variable_values = Hash[@variables.map do |var|
+        variable_values = @variables.map do |var|
           dblptr = FFI::MemoryPointer.new :pointer
           Gurobi.GRBgetdblattrarray @ptr, Gurobi::GRB_DBL_ATTR_X,
                                     var.index, 1, dblptr
-          value = dblptr.read_array_of_double(1)[0]
-          [var.index, value]
-        end]
+          dblptr.read_array_of_double(1)[0]
+        end
       else
         objective_value = nil
-        variable_values = {}
+        variable_values = []
       end
 
       @solution = Solution.new status, objective_value, variable_values

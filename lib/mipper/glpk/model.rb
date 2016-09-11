@@ -123,13 +123,13 @@ module MIPPeR
 
       if status == :optimized
         objective_value = GLPK.glp_mip_obj_val @ptr
-        variable_values = Hash[@variables.map do |var|
-          value = GLPK.glp_mip_col_val(@ptr, var.index)
-          [var.index, value]
-        end]
+        variable_values = [nil]
+        @variables.each do |var|
+          variable_values << GLPK.glp_mip_col_val(@ptr, var.index)
+        end
       else
         objective_value = nil
-        variable_values = {}
+        variable_values = []
       end
 
       @solution = Solution.new status, objective_value, variable_values
